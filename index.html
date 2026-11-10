@@ -179,6 +179,7 @@ tbody tr:hover{background:#f8faff}
 
 /* Tienda pública NexoVentas */
 .public-store{min-height:100vh;background:#f5f7fb;color:#17233c}.store-header{background:linear-gradient(135deg,#10203d,#1b4b87);color:#fff;padding:34px 20px}.store-header-inner,.store-content{width:min(1120px,100%);margin:auto}.store-brand{display:flex;align-items:center;gap:16px}.store-logo{width:76px;height:76px;object-fit:cover;border-radius:18px;background:#ffffff22}.store-header h1{margin:0;font-size:clamp(25px,5vw,38px)}.store-header p{margin:7px 0 0;color:#dce8fb}.store-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;color:#e6efff;font-size:13px}.store-content{padding:26px 18px 50px}.store-tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.store-tools input,.store-tools select{max-width:320px}.store-products{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.store-product{background:#fff;border:1px solid #e5eaf2;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px #19365b0b}.store-product img,.store-no-image{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f8}.store-no-image{display:grid;place-items:center;color:#8290a6}.store-product-info{padding:14px}.store-product-info h3{margin:5px 0;font-size:16px}.store-product-info p{font-size:12px;line-height:1.5;color:#71809a;min-height:34px}.store-price{font-size:22px;font-weight:850;color:#1769e0}.store-status{font-size:11px;font-weight:750;color:#14804a}.store-status.off{color:#a66a13}.store-actions{display:flex;gap:8px;margin-top:12px}.store-actions button{flex:1;font-size:12px;padding:9px}.store-empty{padding:35px;text-align:center;background:#fff;border-radius:15px;color:#71809a}.store-footer{text-align:center;color:#8290a6;padding:22px;font-size:12px}.store-profile-form{max-width:850px}.store-link{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.store-link code{overflow-wrap:anywhere;background:#f1f5fb;padding:9px;border-radius:8px}
+@media print{body{background:#fff!important}.sidebar,.topbar,#authView,.store-header,.store-footer{display:none!important}.public-store{background:#fff!important}.store-content{padding:0!important}.panel{box-shadow:none!important;border:0!important}}
 @media(max-width:560px){.store-products{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.store-product-info{padding:10px}.store-product-info h3{font-size:14px}.store-price{font-size:18px}.store-header{padding:25px 15px}.store-content{padding:18px 11px 35px}.store-logo{width:58px;height:58px}.store-tools input,.store-tools select{max-width:none;flex:1 1 100%}}
 </style>
 </head>
@@ -268,6 +269,16 @@ function table(headers,rows){if(!rows.length)return '<div class="empty">Todavía
 function showModal(title,body){$("modalRoot").innerHTML='<div class="modal-backdrop" id="modalBackdrop"><section class="modal"><div class="modal-head"><h3>'+title+'</h3><button class="secondary" id="closeModal">Cerrar</button></div>'+body+'</section></div>';$("closeModal").onclick=closeModal;$("modalBackdrop").addEventListener("click",e=>{if(e.target.id==="modalBackdrop")closeModal();});}
 function closeModal(){$("modalRoot").innerHTML="";}
 
+async function renderPublicReceipt(token){
+ const root=$("publicStoreView");$("authView").classList.add("hidden");$("appView").classList.add("hidden");root.classList.remove("hidden");root.innerHTML='<div class="store-empty">Cargando comprobante…</div>';
+ try{
+  const response=await fetch(SUPABASE_URL+"/functions/v1/pedidos-tienda?token="+encodeURIComponent(token),{headers:{apikey:SUPABASE_KEY}});
+  const data=await response.json();if(!response.ok)throw new Error(data.error||"No se encontró el comprobante.");
+  const o=data.order,biz=o.comercios||{};
+  root.innerHTML='<main class="store-content"><section class="panel" style="max-width:760px;margin:30px auto"><h2>Comprobante de pedido #'+o.numero+'</h2><h3>'+safe(biz.nombre||"NexoVentas")+'</h3><p>Fecha: '+new Date(o.created_at).toLocaleString("es-AR")+'</p><p>Comprador: '+safe(o.comprador_nombre)+'</p><p>Teléfono: '+safe(o.comprador_telefono)+'</p><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody>'+data.items.map(x=>'<tr><td>'+safe(x.producto_nombre)+'</td><td>'+safe(x.cantidad)+'</td><td>'+money(x.precio_unitario)+'</td><td>'+money(x.subtotal)+'</td></tr>').join("")+'</tbody></table></div><div class="total-line"><span>Total</span><span>'+money(o.total)+'</span></div><p><strong>Estado:</strong> '+safe(o.estado)+' · <strong>Pago:</strong> Pendiente</p><p class="muted small">Comprobante de recepción del pedido. No es factura fiscal ni acredita un pago.</p><button id="printStoreReceipt">Imprimir comprobante</button></section></main>';
+  $("printStoreReceipt").onclick=()=>window.print();
+ }catch(err){root.innerHTML='<div class="store-empty"><h2>Comprobante no disponible</h2><p>'+safe(err.message)+'</p></div>';}
+}
 function slugifyStore(value){return String(value||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,70);}
 async function renderPublicStore(slug){
  const root=$("publicStoreView");$("authView").classList.add("hidden");$("appView").classList.add("hidden");root.classList.remove("hidden");
@@ -348,7 +359,29 @@ async function renderPage(){
      const successMessage=savedStore.tienda_activa?"Perfil guardado y tienda publicada correctamente.":"Perfil guardado. La tienda permanece sin publicar.";await renderPage();appMessage(successMessage);
     }catch(err){appMessage(err.message||"No se pudo guardar el perfil.",true);button.disabled=false;}
    };
+  }else if(currentPage==="pedidos_tienda"){
+   const rows=await loadRows("pedidos_tienda");
+   const statusOptions=["pendiente","confirmado","preparando","listo","entregado","cancelado"];
+   root.innerHTML=heading("Pedidos online","Gestioná las compras recibidas desde tu tienda pública.")+'<section class="panel"><h3>Pedidos recibidos</h3>'+table(["N.º","Fecha","Comprador","Teléfono","Estado","Pago","Total","Acciones"],rows.map(x=>["#"+x.numero,new Date(x.created_at).toLocaleString("es-AR"),safe(x.comprador_nombre),safe(x.comprador_telefono),'<select data-order-status="'+x.id+'">'+statusOptions.map(st=>'<option value="'+st+'" '+(x.estado===st?"selected":"")+'>'+st.charAt(0).toUpperCase()+st.slice(1)+'</option>').join("")+'</select>','<span class="badge">Pendiente</span>',money(x.total),'<button class="ghost" data-store-order-detail="'+x.id+'">Ver</button>']))+'</section>';
+   root.querySelectorAll("[data-order-status]").forEach(sel=>sel.onchange=async()=>{
+    const previous=rows.find(x=>x.id===sel.dataset.orderStatus)?.estado;sel.disabled=true;
+    try{const {data,error}=await db.from("pedidos_tienda").update({estado:sel.value,updated_at:new Date().toISOString()}).eq("id",sel.dataset.orderStatus).eq("comercio_id",profile.comercio_id).select("id").maybeSingle();if(error)throw error;if(!data)throw new Error("No se pudo actualizar el pedido.");appMessage("Estado del pedido actualizado.");}
+    catch(err){appMessage(err.message,true);await renderPage();}
+    finally{sel.disabled=false;}
+   });
+   root.querySelectorAll("[data-store-order-detail]").forEach(btn=>btn.onclick=async()=>{
+    const id=btn.dataset.storeOrderDetail;
+    try{
+     const [{data:o,error:oe},{data:items,error:ie}]=await Promise.all([
+      db.from("pedidos_tienda").select("*").eq("id",id).eq("comercio_id",profile.comercio_id).single(),
+      db.from("pedidos_tienda_detalles").select("producto_nombre,cantidad,precio_unitario,subtotal").eq("pedido_id",id).eq("comercio_id",profile.comercio_id)
+     ]);
+     if(oe)throw oe;if(ie)throw ie;
+     showModal("Pedido online #"+o.numero,'<p><strong>Comprador:</strong> '+safe(o.comprador_nombre)+'</p><p><strong>Teléfono:</strong> '+safe(o.comprador_telefono)+'</p><p><strong>Correo:</strong> '+safe(o.comprador_email||"—")+'</p><p><strong>Comentario:</strong> '+safe(o.nota||"—")+'</p><p><strong>Estado:</strong> '+safe(o.estado)+' · <strong>Pago:</strong> Pendiente</p>'+table(["Producto","Cantidad","Precio unitario","Subtotal"],(items||[]).map(x=>[safe(x.producto_nombre),safe(x.cantidad),money(x.precio_unitario),money(x.subtotal)]))+'<div class="total-line"><span>Total</span><span>'+money(o.total)+'</span></div>');
+    }catch(err){appMessage(err.message,true);}
+   });
   }else if(currentPage==="dashboard"){
+
    const [p,c,o,q,s]=await Promise.all([loadRows("productos","id,nombre,precio,activo"),loadRows("clientes","id,nombre"),loadRows("pedidos","id,total,estado,created_at"),loadRows("presupuestos","id,total,estado"),loadRows("stock","id,cantidad")]);
    root.innerHTML=heading("Resumen","El estado de tu comercio en un solo lugar.")+'<div class="cards"><div class="stat"><span>Productos activos</span><strong>'+p.filter(x=>x.activo).length+'</strong></div><div class="stat"><span>Clientes</span><strong>'+c.length+'</strong></div><div class="stat"><span>Ventas registradas</span><strong>'+o.length+'</strong></div><div class="stat"><span>Total vendido</span><strong>'+money(o.reduce((a,x)=>a+Number(x.total||0),0))+'</strong></div></div><section class="panel"><h3>Actividad reciente · Ventas</h3>'+table(["Fecha","Estado","Total"],o.slice(0,7).map(x=>[new Date(x.created_at).toLocaleDateString("es-AR"),safe(x.estado),money(x.total)]))+'</section><section class="panel"><h3>Alertas de inventario</h3><p class="muted">'+s.filter(x=>Number(x.cantidad)<=0).length+' productos sin existencias registradas.</p></section>';
   }else if(currentPage==="productos"){
@@ -869,7 +902,7 @@ async function openPurchase(suppliers,products,depots){
 function openCashMovement(){showModal("Nuevo movimiento de caja",'<form id="cashForm"><div class="form-grid"><div><label>Tipo</label><select name="tipo"><option value="ingreso">Ingreso</option><option value="egreso">Egreso</option></select></div><div><label>Categoría</label><select name="categoria"><option>Venta / cobro</option><option>Compra</option><option>Alquiler</option><option>Servicios</option><option>Sueldos</option><option>Impuestos</option><option>Transporte</option><option>Otros</option></select></div><div><label>Monto (ARS)</label><input name="monto" type="number" min=".01" step=".01" required></div><div><label>Fecha</label><input name="fecha" type="date" value="'+new Date().toISOString().slice(0,10)+'" required></div></div><label>Descripción</label><input name="descripcion" maxlength="200"><div class="form-actions"><button>Guardar movimiento</button></div></form>');$("cashForm").onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector("button");b.disabled=true;const f=e.target,v={comercio_id:profile.comercio_id,tipo:f.elements.tipo.value,categoria:f.elements.categoria.value,monto:Number(f.elements.monto.value),fecha:f.elements.fecha.value,descripcion:f.elements.descripcion.value.trim()||null};try{if(!Number.isFinite(v.monto)||v.monto<=0)throw new Error("El monto debe ser mayor a cero.");const {error}=await db.from("caja_movimientos").insert(v);if(error)throw error;closeModal();appMessage("Movimiento registrado.");await renderPage();}catch(err){appMessage(err.message,true);b.disabled=false;}};}
 
 async function showTransactionDetail(kind,id){const sale=kind==="pedidos",tableName=sale?"pedido_detalles":"presupuesto_detalles",fk=sale?"pedido_id":"presupuesto_id";const {data,error}=await db.from(tableName).select("producto_nombre,cantidad,precio_unitario,subtotal").eq(fk,id).eq("comercio_id",profile.comercio_id);if(error){appMessage(error.message,true);return;}showModal(sale?"Detalle de venta":"Detalle del presupuesto",table(["Producto","Cantidad","Precio unitario","Subtotal"],(data||[]).map(x=>[safe(x.producto_nombre),safe(x.cantidad),money(x.precio_unitario),money(x.subtotal)])));}
-(async()=>{const publicSlug=new URLSearchParams(window.location.search).get("tienda");if(publicSlug){await renderPublicStore(publicSlug);return;}const {data:{session}}=await db.auth.getSession();if(session?.user)await enterApp(session.user);})();
+(async()=>{const params=new URLSearchParams(window.location.search),publicSlug=params.get("tienda"),receiptToken=params.get("comprobante");if(receiptToken){await renderPublicReceipt(receiptToken);return;}if(publicSlug){await renderPublicStore(publicSlug);return;}const {data:{session}}=await db.auth.getSession();if(session?.user)await enterApp(session.user);})();
  }catch(startupError){
   const message=document.getElementById("authMessage");
   if(message){message.textContent="NexoVentas no pudo iniciar: "+(startupError?.message||String(startupError));message.style.color="#b42318";}
