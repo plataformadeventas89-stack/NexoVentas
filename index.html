@@ -545,7 +545,7 @@ async function saveProduct(e){
    unidad_medida_id:f.elements.unidad_medida_id.value||null,
    descripcion:f.elements.descripcion.value.trim()||null,
    imagen_url:f.elements.imagen_url.value.trim()||null,
-   atributos,precio,
+   atributos:attributes,precio,
    costo_unitario:Number(f.elements.costo_unitario.value||0),
    stock_minimo:Number(f.elements.stock_minimo.value||0),
    peso_kg:nullable(f.elements.peso_kg.value),
