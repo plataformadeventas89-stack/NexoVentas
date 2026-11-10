@@ -288,9 +288,43 @@ async function renderPublicStore(slug){
   root.innerHTML='<header class="store-header"><div class="store-header-inner"><div class="store-brand">'+(business.logo_url?'<img class="store-logo" src="'+safe(business.logo_url)+'" alt="Logo de '+safe(business.nombre)+'">':'<div class="store-logo" style="display:grid;place-items:center;font-size:28px;font-weight:800">N</div>')+'<div><h1>'+safe(business.nombre)+'</h1><p>'+safe(business.descripcion||"Bienvenido a nuestra tienda online")+'</p></div></div><div class="store-meta">'+(location?'<span>📍 '+safe(location)+'</span>':'')+(business.telefono?'<span>☎ '+safe(business.telefono)+'</span>':'')+(wa?'<span><a style="color:white" target="_blank" rel="noopener" href="'+safe(wa)+'">Contactar por WhatsApp</a></span>':'')+'</div></div></header><main class="store-content"><div class="store-tools"><input id="storeSearch" placeholder="Buscar productos…"><select id="storeCategory"><option value="">Todas las categorías</option>'+categories.map(c=>'<option value="'+safe(c.id)+'">'+safe(c.nombre)+'</option>').join("")+'</select><button id="openStoreCart" type="button">🛒 Carrito (0)</button></div><div id="storeProductResults">'+renderProducts(products)+'</div></main><footer class="store-footer">Tienda creada con NexoVentas</footer>';
   const update=()=>{const term=$("storeSearch").value.trim().toLowerCase(),cat=$("storeCategory").value;const list=products.filter(p=>(!term||[p.nombre,p.descripcion,p.marca].join(" ").toLowerCase().includes(term))&&(!cat||p.categoria_comercio_id===cat));$("storeProductResults").innerHTML=renderProducts(list);bind();};
   const bind=()=>{
+   root.querySelectorAll("[data-store-add]").forEach(b=>b.onclick=()=>{
+    const p=products.find(x=>x.id===b.dataset.storeAdd);if(!p||!p.disponible)return;
+    const found=cartItems.find(x=>x.producto_id===p.id);
+    if(found)found.cantidad+=1;else cartItems.push({producto_id:p.id,nombre:p.nombre,precio:Number(p.precio),cantidad:1});
+    updateCartButton();b.textContent="Agregado ✓";
+   });
    root.querySelectorAll("[data-store-detail]").forEach(b=>b.onclick=()=>{const p=products.find(x=>x.id===b.dataset.storeDetail);if(!p)return;const gallery=photos(p);const body='<div class="publication-detail"><div>'+(gallery[0]?'<img class="publication-detail-main" src="'+safe(gallery[0])+'" alt="'+safe(p.nombre)+'">':'<div class="publication-detail-main publication-no-photo">Sin fotografía</div>')+'</div><div><h2>'+safe(p.nombre)+'</h2><div class="publication-detail-price">'+money(p.precio)+'</div><p>'+safe(p.descripcion||"Consultanos para conocer más detalles.")+'</p><p class="store-status '+(p.disponible?"":"off")+'">'+(p.disponible?"Disponible":"Consultar disponibilidad")+'</p>'+(wa?'<a href="'+safe(wa+"?text="+encodeURIComponent("Hola, consulto por "+p.nombre))+'" target="_blank" rel="noopener">Consultar por WhatsApp</a>':'')+'</div></div>';showModal("Detalle del producto",body);});
    root.querySelectorAll("[data-store-ask]").forEach(b=>b.onclick=()=>{const p=products.find(x=>x.id===b.dataset.storeAsk);if(p&&wa)window.open(wa+"?text="+encodeURIComponent("Hola, consulto por "+p.nombre)," _blank".trim(),"noopener");});
   };
+  const updateCartButton=()=>{const b=$("openStoreCart");if(b)b.textContent="🛒 Carrito ("+cartItems.reduce((n,x)=>n+x.cantidad,0)+")";};
+  const renderStoreReceipt=async token=>{
+   root.innerHTML='<div class="store-empty">Preparando tu comprobante…</div>';
+   try{
+    const response=await fetch(SUPABASE_URL+"/functions/v1/pedidos-tienda?token="+encodeURIComponent(token),{headers:{apikey:SUPABASE_KEY}});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||"No se pudo cargar el comprobante.");
+    const o=data.order,biz=o.comercios||{};
+    root.innerHTML='<main class="store-content"><section class="panel" style="max-width:760px;margin:30px auto"><div class="modal-head"><h2>Comprobante de pedido</h2><span class="badge">Pedido recibido</span></div><h3>'+safe(biz.nombre||business.nombre)+'</h3><p>Número de pedido: <strong>#'+o.numero+'</strong></p><p>Fecha: '+new Date(o.created_at).toLocaleString("es-AR")+'</p><p>Comprador: '+safe(o.comprador_nombre)+'</p><p>Teléfono: '+safe(o.comprador_telefono)+'</p><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody>'+data.items.map(x=>'<tr><td>'+safe(x.producto_nombre)+'</td><td>'+safe(x.cantidad)+'</td><td>'+money(x.precio_unitario)+'</td><td>'+money(x.subtotal)+'</td></tr>').join("")+'</tbody></table></div><div class="total-line"><span>Total</span><span>'+money(o.total)+'</span></div><p><strong>Estado:</strong> '+safe(o.estado)+' · <strong>Pago:</strong> Pendiente</p><p class="muted small">Este comprobante confirma la recepción del pedido. No es una factura fiscal ni acredita un pago.</p><div class="form-actions"><button type="button" id="printStoreReceipt">Imprimir comprobante</button><a class="link" href="'+PUBLIC_URL+'?comprobante='+encodeURIComponent(token)+'">Guardar enlace del comprobante</a></div><p><a class="link" href="'+PUBLIC_URL+'?tienda='+encodeURIComponent(business.slug||"")+'">Volver a la tienda</a></p></section></main>';
+    $("printStoreReceipt").onclick=()=>window.print();
+   }catch(err){root.innerHTML='<div class="store-empty"><h2>No pudimos mostrar el comprobante</h2><p>'+safe(err.message)+'</p></div>';}
+  };
+  const openCart=()=>{
+   if(!cartItems.length){showModal("Tu carrito",'<p class="empty">Todavía no agregaste productos.</p>');return;}
+   const rows=cartItems.map((x,i)=>'<div class="cart-row"><div><strong>'+safe(x.nombre)+'</strong><p class="muted small">'+money(x.precio)+' c/u</p></div><div><label>Cantidad</label><input type="number" min="0.001" max="100" step="0.001" value="'+x.cantidad+'" data-cart-qty="'+i+'"></div><button type="button" class="danger" data-cart-remove="'+i+'">×</button></div>').join("");
+   const total=cartItems.reduce((n,x)=>n+x.precio*x.cantidad,0);
+   showModal("Finalizar compra",'<form id="storeCheckoutForm"><h4>Tu pedido</h4>'+rows+'<div class="total-line"><span>Total</span><span>'+money(total)+'</span></div><p class="muted small">El pedido se enviará al comercio para confirmar disponibilidad. El pago se coordinará directamente con el vendedor.</p><hr><h4>Datos del comprador</h4><label>Nombre y apellido *</label><input name="nombre" required minlength="2" maxlength="120"><label>Teléfono / WhatsApp *</label><input name="telefono" required minlength="6" maxlength="40" type="tel"><label>Correo electrónico (opcional)</label><input name="email" type="email" maxlength="160"><label>Comentario (opcional)</label><textarea name="nota" maxlength="500" placeholder="Por ejemplo, horario para contactarte"></textarea><div class="form-actions"><button id="sendStoreOrder">Confirmar pedido</button></div></form>');
+   document.querySelectorAll("[data-cart-qty]").forEach(inp=>inp.onchange=()=>{const i=Number(inp.dataset.cartQty),v=Number(inp.value);if(!Number.isFinite(v)||v<=0)cartItems.splice(i,1);else cartItems[i].cantidad=Math.min(100,v);updateCartButton();openCart();});
+   document.querySelectorAll("[data-cart-remove]").forEach(btn=>btn.onclick=()=>{cartItems.splice(Number(btn.dataset.cartRemove),1);updateCartButton();openCart();});
+   $("storeCheckoutForm").onsubmit=async e=>{
+    e.preventDefault();const form=e.target,b=$("sendStoreOrder");b.disabled=true;
+    try{
+     const response=await fetch(SUPABASE_URL+"/functions/v1/pedidos-tienda",{method:"POST",headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({slug:business.slug,comprador:{nombre:form.elements.nombre.value.trim(),telefono:form.elements.telefono.value.trim(),email:form.elements.email.value.trim(),nota:form.elements.nota.value.trim()},items:cartItems.map(x=>({producto_id:x.producto_id,cantidad:x.cantidad}))})});
+     const result=await response.json();if(!response.ok)throw new Error(result.error||"No se pudo confirmar el pedido.");
+     cartItems=[];updateCartButton();closeModal();await renderStoreReceipt(result.order.token_publico);
+    }catch(err){let msg=form.querySelector(".toast.error");if(!msg){msg=document.createElement("p");msg.className="toast error";form.prepend(msg);}msg.textContent=err.message;b.disabled=false;}
+   };
+  };
+  $("openStoreCart").onclick=openCart;updateCartButton();
   $("storeSearch").addEventListener("input",update);$("storeCategory").addEventListener("change",update);bind();
  }catch(err){root.innerHTML='<div class="store-empty"><h2>Tienda no disponible</h2><p>'+safe(err.message)+'</p><a href="'+PUBLIC_URL+'">Ir a NexoVentas</a></div>';}
 }
