@@ -189,6 +189,18 @@ tbody tr:hover{background:#f8faff}
 <main class="main"><header class="topbar"><strong id="businessTitle">Mi comercio</strong><span id="userEmail" class="muted small"></span><span id="userRole" class="badge"></span><button id="logoutTop" class="secondary">Salir</button></header><div class="content"><div id="appMessage"></div><div id="pageContent"></div></div></main></div>
 <div id="modalRoot"></div>
 <script>
+(async()=>{
+ try{
+  if(!window.supabase?.createClient){
+   await new Promise((resolve,reject)=>{
+    const fallback=document.createElement("script");
+    fallback.src="https://unpkg.com/@supabase/supabase-js@2";
+    fallback.onload=resolve;
+    fallback.onerror=()=>reject(new Error("No se pudo cargar el servicio de conexión. Revisá tu conexión a internet y volvé a intentar."));
+    document.head.appendChild(fallback);
+   });
+  }
+  if(!window.supabase?.createClient)throw new Error("El servicio de conexión no está disponible.");
 const SUPABASE_URL="https://ryrnsaytoygkayynvkio.supabase.co";
 const SUPABASE_KEY="sb_publishable_nyhY54lctgW56Re8Zh7B7A_8fKfIn7I";
 const PUBLIC_URL="https://nexoventas-c1mk.onrender.com/";
@@ -625,4 +637,10 @@ function openCashMovement(){showModal("Nuevo movimiento de caja",'<form id="cash
 
 async function showTransactionDetail(kind,id){const sale=kind==="pedidos",tableName=sale?"pedido_detalles":"presupuesto_detalles",fk=sale?"pedido_id":"presupuesto_id";const {data,error}=await db.from(tableName).select("producto_nombre,cantidad,precio_unitario,subtotal").eq(fk,id).eq("comercio_id",profile.comercio_id);if(error){appMessage(error.message,true);return;}showModal(sale?"Detalle de venta":"Detalle del presupuesto",table(["Producto","Cantidad","Precio unitario","Subtotal"],(data||[]).map(x=>[safe(x.producto_nombre),safe(x.cantidad),money(x.precio_unitario),money(x.subtotal)])));}
 (async()=>{const {data:{session}}=await db.auth.getSession();if(session?.user)await enterApp(session.user);})();
+ }catch(startupError){
+  const message=document.getElementById("authMessage");
+  if(message){message.textContent="NexoVentas no pudo iniciar: "+(startupError?.message||String(startupError));message.style.color="#b42318";}
+  console.error("NexoVentas startup error:",startupError);
+ }
+})();
 </script></body></html>
