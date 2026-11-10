@@ -301,7 +301,34 @@ async function renderPage(){
    document.querySelectorAll("[data-edit-product]").forEach(b=>b.onclick=()=>openProductForm(rows.find(x=>x.id===b.dataset.editProduct),units,categories));
    document.querySelectorAll("[data-toggle-product]").forEach(b=>b.onclick=()=>toggleProduct(rows.find(x=>x.id===b.dataset.toggleProduct)));
    document.querySelectorAll("[data-variants-product]").forEach(b=>b.onclick=()=>openProductVariants(rows.find(x=>x.id===b.dataset.variantsProduct)));if(!isAdmin()){$("formPanel").remove();document.querySelectorAll("[data-edit-product],[data-toggle-product],[data-variants-product]").forEach(b=>b.remove());document.querySelectorAll("#pageContent table tr").forEach(tr=>tr.children[4]?.remove());}
-  }else if(currentPage==="rubros"){
+  }else if(currentPage==="publicaciones"){
+    const [rows,categories,businessResult]=await Promise.all([
+     loadRows("productos"),loadRows("categorias_comercio"),
+     db.from("comercios").select("nombre").eq("id",profile.comercio_id).maybeSingle()
+    ]);
+    const active=rows.filter(x=>x.activo&&x.publicado_online!==false);
+    const businessName=businessResult.data?.nombre||"Nuestro comercio";
+    const photos=p=>(Array.isArray(p.imagenes)&&p.imagenes.length?p.imagenes:(p.imagen_url?[p.imagen_url]:[])).filter(Boolean).slice(0,4);
+    const description=p=>p.descripcion||(p.atributos&&p.atributos.detalle)||"Consultanos para conocer más detalles de este producto.";
+    const share=p=>{
+     const msg=businessName+" · "+p.nombre+"\nPrecio: "+money(p.precio)+"\n"+description(p);
+     window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank","noopener");
+    };
+    root.innerHTML=heading("Publicaciones","Una vidriera digital para mostrar tus productos y compartirlos con tus clientes.")+
+     '<section class="panel"><h3>La vidriera de '+safe(businessName)+'</h3><p class="muted small">'+active.length+' productos publicados</p></section>'+
+     (active.length?'<div class="publication-grid">'+active.map(p=>{
+      const image=photos(p)[0],category=categories.find(c=>c.id===p.categoria_comercio_id)?.nombre||p.marca||"Producto";
+      return '<article class="publication-card"><div class="publication-cover">'+(image?'<img src="'+safe(image)+'" alt="'+safe(p.nombre)+'" loading="lazy">':'<div class="publication-no-photo">Sin fotografía</div>')+(photos(p).length>1?'<span class="publication-count">'+photos(p).length+' fotos</span>':'')+'</div><div class="publication-body"><div class="publication-category">'+safe(category)+'</div><div class="publication-name">'+safe(p.nombre)+'</div><div class="publication-price">'+money(p.precio)+'</div><p class="publication-desc">'+safe(description(p).slice(0,130))+'</p><div class="publication-actions"><button class="secondary" data-pub-view="'+p.id+'">Ver detalles</button><button data-pub-share="'+p.id+'">Compartir</button></div></div></article>';
+     }).join("")+'</div>':'<div class="publication-empty"><h3>Aún no hay productos publicados</h3><p>Activá tus productos en la sección Productos para mostrarlos aquí.</p><button id="pubGoProducts">Ir a Productos</button></div>');
+    $("pubGoProducts")?.addEventListener("click",()=>{currentPage="productos";document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page==="productos"));renderPage();});
+    document.querySelectorAll("[data-pub-share]").forEach(b=>b.onclick=()=>{const p=active.find(x=>x.id===b.dataset.pubShare);if(p)share(p);});
+    document.querySelectorAll("[data-pub-view]").forEach(b=>b.onclick=()=>{
+     const p=active.find(x=>x.id===b.dataset.pubView);if(!p)return;
+     const gallery=photos(p);
+     showModal("Vista previa de publicación",'<div class="publication-detail"><div>'+(gallery[0]?'<img class="publication-detail-main" src="'+safe(gallery[0])+'" alt="'+safe(p.nombre)+'">':'<div class="publication-detail-main publication-no-photo">Sin fotografía</div>')+'</div><div><h2>'+safe(p.nombre)+'</h2><div class="publication-detail-price">'+money(p.precio)+'</div><p class="publication-detail-copy">'+safe(description(p))+'</p><p class="muted small">'+safe(businessName)+'</p><button id="pubModalShare">Compartir por WhatsApp</button></div></div>');
+     $("pubModalShare").onclick=()=>share(p);
+    });
+ }else if(currentPage==="rubros"){
    const [rubroResult,assigned,categories]=await Promise.all([
     db.from("rubros").select("id,nombre,slug").eq("activo",true).order("orden"),
     loadRows("comercio_rubros"),
