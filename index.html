@@ -217,9 +217,21 @@ async function ensureBusiness(user){
 }
 async function enterApp(user){
  if(busy)return;busy=true;currentUser=user;
- try{await ensureBusiness(user);syncRoleUI();$("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("userEmail").textContent=user.email||"";const {data:business}=await db.from("comercios").select("nombre").eq("id",profile.comercio_id).maybeSingle();$("businessTitle").textContent=business?.nombre||"Mi comercio";await renderPage();}
- catch(e){$("appView").classList.add("hidden");$("authView").classList.remove("hidden");authMessage("No pudimos abrir tu comercio: "+e.message,true);}
- finally{busy=false;}
+ try{
+  await ensureBusiness(user);
+  if(!profile?.comercio_id)throw new Error("Tu usuario todavía no tiene un comercio asociado.");
+  syncRoleUI();
+  $("authView").classList.add("hidden");$("appView").classList.remove("hidden");
+  $("userEmail").textContent=user.email||"";
+  const {data:business,error:businessError}=await db.from("comercios").select("nombre").eq("id",profile.comercio_id).maybeSingle();
+  if(businessError)throw businessError;
+  $("businessTitle").textContent=business?.nombre||"Mi comercio";
+  try{await renderPage();}
+  catch(pageError){appMessage("Ingresaste correctamente, pero no se pudo cargar el panel: "+(pageError?.message||String(pageError)),true);}
+ }catch(e){
+  $("appView").classList.add("hidden");$("authView").classList.remove("hidden");
+  authMessage("No pudimos validar tu comercio: "+(e?.message||String(e)),true);
+ }finally{busy=false;}
 }
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();const b=e.target.querySelector("button");b.disabled=true;authMessage("Ingresando…");try{const {data,error}=await db.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error)throw error;await enterApp(data.user);}catch(err){authMessage(err.message,true);}finally{b.disabled=false;}});
 $("registerForm").addEventListener("submit",async e=>{e.preventDefault();const b=e.target.querySelector("button");b.disabled=true;authMessage("Creando tu cuenta…");try{const {data,error}=await db.auth.signUp({email:$("registerEmail").value.trim(),password:$("registerPassword").value,options:{emailRedirectTo:PUBLIC_URL,data:{nombre_comercio:$("businessName").value.trim(),nombre_usuario:$("userName").value.trim()}}});if(error)throw error;if(data.session&&data.user)await enterApp(data.user);else authMessage("Cuenta creada. Revisá tu correo y confirmá el registro. Después ingresá aquí para terminar de configurar tu comercio.");}catch(err){authMessage(err.message,true);}finally{b.disabled=false;}});
