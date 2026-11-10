@@ -409,7 +409,7 @@ async function renderPage(){
      if(!localidad||!provincia)throw new Error("Ingresá localidad y provincia.");
      if(postalCodes.some(cp=>!/^[A-Z0-9-]{3,10}$/.test(cp||"")))throw new Error("Revisá los códigos postales: usá entre 3 y 10 letras, números o guiones.");
      if(new Set(postalCodes.map(cp=>cp||"")).size!==postalCodes.length)throw new Error("Hay códigos postales repetidos en la lista.");
-     const rows=postalCodes.map(codigo_postal=>({comercio_id:profile.comercio_id,metodo_id:form.dataset.method,localidad,provincia,codigo_postal,precio,dias_min:min,dias_max:max,gratis_desde:free}));
+     const rows=postalCodes.map(codigo_postal=>({comercio_id:profile.comercio_id,metodo_id:form.dataset.method,localidad,provincia,codigo_postal,precio:price,dias_min:min,dias_max:max,gratis_desde:free}));
      const {error}=await db.from("envios_zonas").insert(rows);
      if(error)throw error;appMessage(postalCodes.length>1?postalCodes.length+" tarifas guardadas para "+localidad+".":"Destino y tarifa guardados.");await renderPage();
     }catch(err){appMessage(err.message,true);button.disabled=false;}
