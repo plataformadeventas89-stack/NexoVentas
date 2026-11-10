@@ -177,7 +177,7 @@ begin
 end;
 $function$
 
-
+;
 CREATE OR REPLACE FUNCTION public.registrar_presupuesto(p_cliente_id uuid, p_items jsonb, p_lista_precio_id uuid DEFAULT NULL::uuid)
  RETURNS uuid
  LANGUAGE plpgsql
@@ -234,7 +234,7 @@ begin
  return v_presupuesto;
 end;
 $function$
-
+;
 revoke all on function public.registrar_venta_en_deposito(uuid,uuid,jsonb,uuid) from public,anon;
 grant execute on function public.registrar_venta_en_deposito(uuid,uuid,jsonb,uuid) to authenticated;
 revoke all on function public.registrar_presupuesto(uuid,jsonb,uuid) from public,anon;
