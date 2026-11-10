@@ -96,6 +96,7 @@ async function renderPage(){
    $("productForm").onsubmit=saveProduct;
    document.querySelectorAll("[data-edit-product]").forEach(b=>b.onclick=()=>openProductForm(rows.find(x=>x.id===b.dataset.editProduct),units,categories));
    document.querySelectorAll("[data-toggle-product]").forEach(b=>b.onclick=()=>toggleProduct(rows.find(x=>x.id===b.dataset.toggleProduct)));
+   document.querySelectorAll("[data-variants-product]").forEach(b=>b.onclick=()=>openProductVariants(rows.find(x=>x.id===b.dataset.variantsProduct)));
   }else if(currentPage==="rubros"){
    const [rubroResult,assigned,categories]=await Promise.all([
     db.from("rubros").select("id,nombre,slug").eq("activo",true).order("orden"),
@@ -280,6 +281,18 @@ async function renderPage(){
   }
  }catch(err){root.innerHTML='<section class="panel"><p class="muted">No pudimos cargar esta sección.</p><p>'+safe(err.message)+'</p><button class="secondary" id="retry">Reintentar</button></section>';const r=$("retry");if(r)r.onclick=renderPage;}
 }
+async function openProductVariants(product){
+ if(!product)return;
+ const render=async()=>{
+  const {data,error}=await db.from("producto_variantes").select("*").eq("comercio_id",profile.comercio_id).eq("producto_id",product.id).order("created_at",{ascending:true});
+  if(error)throw error;
+  const rows=data||[];
+  showModal("Variantes · "+safe(product.nombre),'<form id="variantForm"><div class="form-grid"><div><label>Nombre / presentación *</label><input name="nombre" required maxlength="120" placeholder="Ej.: Rojo / talle M / 500 ml"></div><div><label>SKU</label><input name="sku" maxlength="80"></div><div><label>Código de barras</label><input name="codigo_barras" maxlength="80"></div><div><label>Adicional al precio base (ARS)</label><input name="precio_adicional" type="number" step=".01" value="0"></div><div><label>Adicional al costo base (ARS)</label><input name="costo_adicional" type="number" step=".01" value="0"></div></div><div class="form-actions"><button>Crear variante</button></div></form><section class="panel"><h3>Variantes existentes</h3>'+table(["Variante","SKU","Adic. precio","Adic. costo","Estado","Acción"],rows.map(v=>[safe(v.nombre),safe(v.sku||"—"),money(v.precio_adicional),money(v.costo_adicional),v.activa?"Activa":"Inactiva",'<button class="ghost" data-toggle-variant="'+v.id+'">'+(v.activa?"Desactivar":"Activar")+'</button>']))+'</section><p class="muted small">La variante suma estos adicionales al precio y costo del producto. Podés asignarle un precio final específico desde Listas de precios.</p>');
+  $("variantForm").onsubmit=async e=>{e.preventDefault();const f=e.target,b=f.querySelector("button");b.disabled=true;try{const {error}=await db.from("producto_variantes").insert({comercio_id:profile.comercio_id,producto_id:product.id,nombre:f.elements.nombre.value.trim(),sku:f.elements.sku.value.trim()||null,codigo_barras:f.elements.codigo_barras.value.trim()||null,precio_adicional:Number(f.elements.precio_adicional.value||0),costo_adicional:Number(f.elements.costo_adicional.value||0)});if(error)throw error;await render();}catch(err){appMessage(err.message,true);b.disabled=false;}};
+  document.querySelectorAll("[data-toggle-variant]").forEach(b=>b.onclick=async()=>{const v=rows.find(x=>x.id===b.dataset.toggleVariant);const {error}=await db.from("producto_variantes").update({activa:!v.activa}).eq("id",v.id).eq("comercio_id",profile.comercio_id);if(error)appMessage(error.message,true);else await render();});
+ };
+ try{await render();}catch(err){appMessage(err.message,true);}
+}
 function openProductForm(p,units=[],categories=[]){const form=$("productForm");form.reset();form.elements.id.value=p?.id||"";["nombre","codigo","codigo_barras","marca","descripcion","imagen_url","precio","costo_unitario","stock_minimo","peso_kg","largo_cm","ancho_cm","alto_cm"].forEach(k=>{if(form.elements[k])form.elements[k].value=p?.[k]??(k==="stock_minimo"?0:k==="costo_unitario"?0:"");});form.elements.categoria_comercio_id.value=p?.categoria_comercio_id||"";form.elements.unidad_medida_id.value=p?.unidad_medida_id||(units.find(x=>x.simbolo==="un")?.id||"");form.elements.atributos.value=JSON.stringify(p?.atributos||{},null,2);form.elements.permite_venta_fraccionada.checked=Boolean(p?.permite_venta_fraccionada);form.elements.publicado_online.checked=Boolean(p?.publicado_online);$("formTitle").textContent=p?"Editar producto":"Nuevo producto";$("formPanel").classList.remove("hidden");}
 async function saveProduct(e){e.preventDefault();const f=e.target,b=f.querySelector("button");b.disabled=true;const id=f.elements.id.value;let attributes={};try{attributes=JSON.parse(f.elements.atributos.value||"{}");if(!attributes||Array.isArray(attributes)||typeof attributes!=="object")throw new Error("Las características deben ser un objeto JSON.");}catch(err){appMessage("Revisá las características técnicas: "+err.message,true);b.disabled=false;return;}const nullable=n=>n===""?null:Number(n);const sku=f.elements.codigo.value.trim()||null;const values={nombre:f.elements.nombre.value.trim(),codigo:sku,sku,codigo_barras:f.elements.codigo_barras.value.trim()||null,marca:f.elements.marca.value.trim()||null,categoria_comercio_id:f.elements.categoria_comercio_id.value||null,unidad_medida_id:f.elements.unidad_medida_id.value||null,descripcion:f.elements.descripcion.value.trim()||null,imagen_url:f.elements.imagen_url.value.trim()||null,atributos,precio:Number(f.elements.precio.value),costo_unitario:Number(f.elements.costo_unitario.value||0),stock_minimo:Number(f.elements.stock_minimo.value||0),peso_kg:nullable(f.elements.peso_kg.value),largo_cm:nullable(f.elements.largo_cm.value),ancho_cm:nullable(f.elements.ancho_cm.value),alto_cm:nullable(f.elements.alto_cm.value),permite_venta_fraccionada:f.elements.permite_venta_fraccionada.checked,publicado_online:f.elements.publicado_online.checked,comercio_id:profile.comercio_id};try{const result=id?await db.from("productos").update(values).eq("id",id).eq("comercio_id",profile.comercio_id):await db.from("productos").insert(values);if(result.error)throw result.error;if(!id){const {data:p,error:findError}=await db.from("productos").select("id").eq("comercio_id",profile.comercio_id).eq("nombre",values.nombre).order("created_at",{ascending:false}).limit(1).maybeSingle();if(findError)throw findError;if(p){const stockResult=await db.from("stock").upsert({comercio_id:profile.comercio_id,producto_id:p.id,cantidad:0},{onConflict:"comercio_id,producto_id",ignoreDuplicates:true});if(stockResult.error)throw stockResult.error;const {data:d}=await db.from("depositos").select("id").eq("comercio_id",profile.comercio_id).eq("es_principal",true).maybeSingle();if(d){const inv=await db.from("inventario_saldos").upsert({comercio_id:profile.comercio_id,deposito_id:d.id,producto_id:p.id,cantidad:0},{onConflict:"comercio_id,deposito_id,producto_id,variante_id"});if(inv.error)throw inv.error;}}}appMessage("Producto guardado correctamente.");await renderPage();}catch(err){appMessage(err.message,true);}finally{b.disabled=false;}}
 async function toggleProduct(p){if(!p)return;const {error}=await db.from("productos").update({activo:!p.activo}).eq("id",p.id).eq("comercio_id",profile.comercio_id);if(error)appMessage(error.message,true);else{appMessage("Estado del producto actualizado.");await renderPage();}}
@@ -288,19 +301,64 @@ function openClientForm(c){const f=$("clientForm");f.reset();f.elements.id.value
 async function saveClient(e){e.preventDefault();const f=e.target,b=f.querySelector("button");b.disabled=true;const id=f.elements.id.value,values={nombre:f.elements.nombre.value.trim(),telefono:f.elements.telefono.value.trim()||null,email:f.elements.email.value.trim()||null,direccion:f.elements.direccion.value.trim()||null,comercio_id:profile.comercio_id};try{const r=id?await db.from("clientes").update(values).eq("id",id).eq("comercio_id",profile.comercio_id):await db.from("clientes").insert(values);if(r.error)throw r.error;appMessage("Cliente guardado correctamente.");await renderPage();}catch(err){appMessage(err.message,true);}finally{b.disabled=false;}}
 async function deleteClient(id){if(!confirm("¿Eliminar este cliente? Las ventas y presupuestos históricos conservarán sus importes."))return;const {error}=await db.from("clientes").delete().eq("id",id).eq("comercio_id",profile.comercio_id);if(error)appMessage(error.message,true);else{appMessage("Cliente eliminado.");await renderPage();}}
 async function openTransaction(isSale,clients){
- const [allProducts,depots]=await Promise.all([loadRows("productos","id,nombre,precio,activo"),loadRows("depositos")]);
- const products=allProducts.filter(p=>p.activo),activeDepots=depots.filter(d=>d.activo);
+ const [allProducts,depots,variants,lists,priceItems]=await Promise.all([
+  loadRows("productos","id,nombre,precio,activo"),loadRows("depositos"),loadRows("producto_variantes"),loadRows("listas_precios"),loadRows("lista_precios_items")
+ ]);
+ const products=allProducts.filter(p=>p.activo),activeDepots=depots.filter(d=>d.activo),activeLists=lists.filter(l=>l.activa);
  if(!products.length){appMessage("Primero cargá al menos un producto activo.",true);return;}
  if(isSale&&!activeDepots.length){appMessage("Primero creá un depósito activo en Sucursales y depósitos.",true);return;}
  cart=[];
- const options=products.map(p=>'<option value="'+p.id+'">'+safe(p.nombre)+' · '+money(p.precio)+'</option>').join("");
+ const options=products.map(p=>'<option value="'+p.id+'">'+safe(p.nombre)+'</option>').join("");
  const depotOptions=isSale?'<div><label>Depósito de salida *</label><select name="deposito_id" required>'+activeDepots.map(d=>'<option value="'+d.id+'">'+safe(d.nombre)+'</option>').join("")+'</select></div>':"";
- showModal(isSale?"Registrar venta":"Crear presupuesto",'<form id="transactionForm"><label>Cliente (opcional)</label><select name="cliente_id"><option value="">Consumidor final / sin asignar</option>'+clients.map(c=>'<option value="'+c.id+'">'+safe(c.nombre)+'</option>').join("")+'</select>'+depotOptions+'<div id="cartRows"></div><button type="button" class="secondary" id="addCartRow">+ Agregar producto</button><div class="total-line"><span>Total</span><span id="cartTotal">'+money(0)+'</span></div><p class="muted small">'+(isSale?"La venta descontará existencias del depósito elegido y del stock total del comercio.":"El presupuesto guarda los precios actuales y no modifica el stock.")+'</p><div class="form-actions"><button id="saveTransaction">Confirmar '+(isSale?"venta":"presupuesto")+'</button></div></form>');
- const updateCartTotal=()=>{let total=0;document.querySelectorAll(".cart-row").forEach(row=>{const p=products.find(x=>x.id===row.querySelector(".cart-product").value);total+=Number(p?.precio||0)*Number(row.querySelector(".cart-quantity").value||0);});$("cartTotal").textContent=money(total);};
- const add=()=>{const row=document.createElement("div");row.className="cart-row";row.innerHTML='<div><label>Producto</label><select class="cart-product">'+options+'</select></div><div><label>Cantidad</label><input class="cart-quantity" type="number" min=".001" step=".001" value="1"></div><button type="button" class="danger remove-row">×</button>';$("cartRows").appendChild(row);row.querySelectorAll("select,input").forEach(el=>el.addEventListener("change",updateCartTotal));row.querySelector(".remove-row").onclick=()=>{row.remove();updateCartTotal();};updateCartTotal();};
- $("addCartRow").onclick=add;$("transactionForm").onsubmit=async e=>{e.preventDefault();const b=$("saveTransaction");b.disabled=true;try{const items=Array.from(document.querySelectorAll(".cart-row")).map(row=>({producto_id:row.querySelector(".cart-product").value,cantidad:Number(row.querySelector(".cart-quantity").value)}));if(!items.length||items.some(x=>!x.producto_id||!Number.isFinite(x.cantidad)||x.cantidad<=0))throw new Error("Agregá productos y cantidades válidas.");let result;if(isSale){result=await db.rpc("registrar_venta_en_deposito",{p_cliente_id:e.target.elements.cliente_id.value||null,p_deposito_id:e.target.elements.deposito_id.value,p_items:items});}else{result=await db.rpc("registrar_presupuesto",{p_cliente_id:e.target.elements.cliente_id.value||null,p_items:items});}if(result.error)throw result.error;closeModal();appMessage((isSale?"Venta":"Presupuesto")+" registrado correctamente. N.º "+String(result.data).slice(0,8));await renderPage();}catch(err){appMessage(err.message,true);b.disabled=false;}};add();
+ const listOptions='<option value="">Precio de catálogo / predeterminada</option>'+activeLists.map(l=>'<option value="'+l.id+'" '+(l.es_predeterminada?"selected":"")+'>'+safe(l.nombre)+'</option>').join("");
+ showModal(isSale?"Registrar venta":"Crear presupuesto",'<form id="transactionForm"><label>Cliente (opcional)</label><select name="cliente_id"><option value="">Consumidor final / sin asignar</option>'+clients.map(c=>'<option value="'+c.id+'">'+safe(c.nombre)+'</option>').join("")+'</select><div class="form-grid"><div><label>Lista de precios</label><select name="lista_precio_id">'+listOptions+'</select></div>'+depotOptions+'</div><div id="cartRows"></div><button type="button" class="secondary" id="addCartRow">+ Agregar producto</button><div class="total-line"><span>Total estimado</span><span id="cartTotal">'+money(0)+'</span></div><p class="muted small">El precio final se valida y calcula nuevamente en el servidor. Las variantes pueden tener un adicional propio o un precio específico en la lista elegida.</p><div class="form-actions"><button id="saveTransaction">Confirmar '+(isSale?"venta":"presupuesto")+'</button></div></form>');
+ const unitPrice=(productId,variantId,qty,listId)=>{
+  const p=products.find(x=>x.id===productId),v=variants.find(x=>x.id===variantId);
+  if(!p)return 0;
+  if(listId){
+   const matching=priceItems.filter(x=>x.lista_precio_id===listId&&x.producto_id===productId&&Number(x.cantidad_minima)<=qty);
+   const exact=matching.filter(x=>(x.variante_id||null)===(variantId||null)).sort((a,b)=>Number(b.cantidad_minima)-Number(a.cantidad_minima))[0];
+   const fallback=variantId?matching.filter(x=>!x.variante_id).sort((a,b)=>Number(b.cantidad_minima)-Number(a.cantidad_minima))[0]:null;
+   if(exact||fallback)return Number((exact||fallback).precio);
+  }
+  return Number(p.precio||0)+Number(v?.precio_adicional||0);
+ };
+ const updateCartTotal=()=>{
+  let total=0;
+  document.querySelectorAll(".cart-row").forEach(row=>{
+   const pid=row.querySelector(".cart-product").value,vid=row.querySelector(".cart-variant").value,qty=Number(row.querySelector(".cart-quantity").value||0);
+   const price=unitPrice(pid,vid,qty,$("transactionForm").elements.lista_precio_id.value);
+   total+=price*qty;row.querySelector(".cart-unit-price").textContent=money(price);
+  });
+  $("cartTotal").textContent=money(total);
+ };
+ const add=()=>{
+  const row=document.createElement("div");row.className="cart-row";
+  row.innerHTML='<div><label>Producto</label><select class="cart-product">'+options+'</select><label>Variante</label><select class="cart-variant"><option value="">General</option></select><small class="muted cart-unit-price"></small></div><div><label>Cantidad</label><input class="cart-quantity" type="number" min=".001" step=".001" value="1"></div><button type="button" class="danger remove-row">×</button>';
+  $("cartRows").appendChild(row);
+  const updateVariants=()=>{const pid=row.querySelector(".cart-product").value;row.querySelector(".cart-variant").innerHTML='<option value="">General</option>'+variants.filter(v=>v.producto_id===pid&&v.activa).map(v=>'<option value="'+v.id+'">'+safe(v.nombre)+'</option>').join("");updateCartTotal();};
+  row.querySelector(".cart-product").onchange=updateVariants;
+  row.querySelector(".cart-variant").onchange=updateCartTotal;
+  row.querySelector(".cart-quantity").oninput=updateCartTotal;
+  row.querySelector(".remove-row").onclick=()=>{row.remove();updateCartTotal();};
+  updateVariants();
+ };
+ $("transactionForm").elements.lista_precio_id.onchange=updateCartTotal;
+ $("addCartRow").onclick=add;
+ $("transactionForm").onsubmit=async e=>{
+  e.preventDefault();const b=$("saveTransaction");b.disabled=true;
+  try{
+   const items=Array.from(document.querySelectorAll(".cart-row")).map(row=>({producto_id:row.querySelector(".cart-product").value,variante_id:row.querySelector(".cart-variant").value||null,cantidad:Number(row.querySelector(".cart-quantity").value)}));
+   if(!items.length||items.some(x=>!x.producto_id||!Number.isFinite(x.cantidad)||x.cantidad<=0))throw new Error("Agregá productos y cantidades válidas.");
+   const listId=e.target.elements.lista_precio_id.value||null;
+   let result;
+   if(isSale)result=await db.rpc("registrar_venta_en_deposito",{p_cliente_id:e.target.elements.cliente_id.value||null,p_deposito_id:e.target.elements.deposito_id.value,p_items:items,p_lista_precio_id:listId});
+   else result=await db.rpc("registrar_presupuesto",{p_cliente_id:e.target.elements.cliente_id.value||null,p_items:items,p_lista_precio_id:listId});
+   if(result.error)throw result.error;closeModal();appMessage((isSale?"Venta":"Presupuesto")+" registrado correctamente. N.º "+String(result.data).slice(0,8));await renderPage();
+  }catch(err){appMessage(err.message,true);b.disabled=false;}
+ };
+ add();
 }
-
 async function openInventoryTransfer(depots,products,variants){
  if(depots.length<2){appMessage("Necesitás al menos dos depósitos activos para transferir mercadería.",true);return;}
  if(!products.length){appMessage("No hay productos activos para transferir.",true);return;}
@@ -332,13 +390,30 @@ async function deleteSupplier(id){if(!confirm("¿Eliminar este proveedor? Las co
 async function openPurchase(suppliers,products,depots){
  if(!products.length){appMessage("Primero cargá un producto activo.",true);return;}
  if(!depots.length){appMessage("Primero creá un depósito activo en Sucursales y depósitos.",true);return;}
+ const [variants]=await Promise.all([loadRows("producto_variantes")]);
  const so=suppliers.map(s=>'<option value="'+s.id+'">'+safe(s.nombre)+'</option>').join("");
  const po=products.map(p=>'<option value="'+p.id+'">'+safe(p.nombre)+'</option>').join("");
  const dopts=depots.map(d=>'<option value="'+d.id+'">'+safe(d.nombre)+'</option>').join("");
- showModal("Registrar compra",'<form id="purchaseForm"><label>Proveedor (opcional)</label><select name="proveedor_id"><option value="">Sin asignar</option>'+so+'</select><label>Depósito que recibe *</label><select name="deposito_id" required>'+dopts+'</select><div id="purchaseRows"></div><button type="button" class="secondary" id="addPurchaseRow">+ Agregar producto</button><div class="total-line"><span>Total de compra</span><span id="purchaseTotal">'+money(0)+'</span></div><p class="muted small">La compra ingresará mercadería al depósito elegido y actualizará el stock total y el costo promedio ponderado.</p><div class="form-actions"><button id="savePurchase">Confirmar compra</button></div></form>');
+ showModal("Registrar compra",'<form id="purchaseForm"><label>Proveedor (opcional)</label><select name="proveedor_id"><option value="">Sin asignar</option>'+so+'</select><label>Depósito que recibe *</label><select name="deposito_id" required>'+dopts+'</select><div id="purchaseRows"></div><button type="button" class="secondary" id="addPurchaseRow">+ Agregar producto</button><div class="total-line"><span>Total de compra</span><span id="purchaseTotal">'+money(0)+'</span></div><p class="muted small">La compra ingresará mercadería al depósito elegido, por variante, y actualizará el stock total y el costo promedio ponderado del producto.</p><div class="form-actions"><button id="savePurchase">Confirmar compra</button></div></form>');
  const update=()=>{let t=0;document.querySelectorAll(".purchase-row").forEach(r=>t+=Number(r.querySelector(".purchase-qty").value||0)*Number(r.querySelector(".purchase-cost").value||0));$("purchaseTotal").textContent=money(t);};
- const add=()=>{const r=document.createElement("div");r.className="purchase-row cart-row";r.innerHTML='<div><label>Producto</label><select class="purchase-product">'+po+'</select></div><div><label>Cantidad</label><input class="purchase-qty" type="number" min=".001" step=".001" value="1"></div><div><label>Costo unitario</label><input class="purchase-cost" type="number" min="0" step=".01" value="0"></div><button type="button" class="danger remove-row">×</button>';$("purchaseRows").appendChild(r);r.querySelectorAll("input,select").forEach(x=>x.addEventListener("input",update));r.querySelector(".remove-row").onclick=()=>{r.remove();update();};};
- $("addPurchaseRow").onclick=add;$("purchaseForm").onsubmit=async e=>{e.preventDefault();const b=$("savePurchase");b.disabled=true;try{const items=Array.from(document.querySelectorAll(".purchase-row")).map(r=>({producto_id:r.querySelector(".purchase-product").value,cantidad:Number(r.querySelector(".purchase-qty").value),costo_unitario:Number(r.querySelector(".purchase-cost").value)}));if(!items.length||items.some(x=>!x.producto_id||!Number.isFinite(x.cantidad)||x.cantidad<=0||!Number.isFinite(x.costo_unitario)||x.costo_unitario<0))throw new Error("Revisá los productos, cantidades y costos.");const {data,error}=await db.rpc("registrar_compra_en_deposito",{p_proveedor_id:e.target.elements.proveedor_id.value||null,p_deposito_id:e.target.elements.deposito_id.value,p_items:items});if(error)throw error;closeModal();appMessage("Compra registrada en el depósito elegido. N.º "+String(data).slice(0,8));await renderPage();}catch(err){appMessage(err.message,true);b.disabled=false;}};add();
+ const add=()=>{
+  const r=document.createElement("div");r.className="purchase-row cart-row";
+  r.innerHTML='<div><label>Producto</label><select class="purchase-product">'+po+'</select><label>Variante</label><select class="purchase-variant"><option value="">General</option></select></div><div><label>Cantidad</label><input class="purchase-qty" type="number" min=".001" step=".001" value="1"></div><div><label>Costo unitario</label><input class="purchase-cost" type="number" min="0" step=".01" value="0"></div><button type="button" class="danger remove-row">×</button>';
+  $("purchaseRows").appendChild(r);
+  const setVariants=()=>{const pid=r.querySelector(".purchase-product").value;r.querySelector(".purchase-variant").innerHTML='<option value="">General</option>'+variants.filter(v=>v.producto_id===pid&&v.activa).map(v=>'<option value="'+v.id+'">'+safe(v.nombre)+'</option>').join("");};
+  r.querySelector(".purchase-product").onchange=setVariants;r.querySelectorAll("input,select").forEach(x=>x.addEventListener("input",update));r.querySelector(".remove-row").onclick=()=>{r.remove();update();};setVariants();
+ };
+ $("addPurchaseRow").onclick=add;
+ $("purchaseForm").onsubmit=async e=>{
+  e.preventDefault();const b=$("savePurchase");b.disabled=true;
+  try{
+   const items=Array.from(document.querySelectorAll(".purchase-row")).map(r=>({producto_id:r.querySelector(".purchase-product").value,variante_id:r.querySelector(".purchase-variant").value||null,cantidad:Number(r.querySelector(".purchase-qty").value),costo_unitario:Number(r.querySelector(".purchase-cost").value)}));
+   if(!items.length||items.some(x=>!x.producto_id||!Number.isFinite(x.cantidad)||x.cantidad<=0||!Number.isFinite(x.costo_unitario)||x.costo_unitario<0))throw new Error("Revisá los productos, variantes, cantidades y costos.");
+   const {data,error}=await db.rpc("registrar_compra_en_deposito",{p_proveedor_id:e.target.elements.proveedor_id.value||null,p_deposito_id:e.target.elements.deposito_id.value,p_items:items});
+   if(error)throw error;closeModal();appMessage("Compra registrada en el depósito elegido. N.º "+String(data).slice(0,8));await renderPage();
+  }catch(err){appMessage(err.message,true);b.disabled=false;}
+ };
+ add();
 }
 function openCashMovement(){showModal("Nuevo movimiento de caja",'<form id="cashForm"><div class="form-grid"><div><label>Tipo</label><select name="tipo"><option value="ingreso">Ingreso</option><option value="egreso">Egreso</option></select></div><div><label>Categoría</label><select name="categoria"><option>Venta / cobro</option><option>Compra</option><option>Alquiler</option><option>Servicios</option><option>Sueldos</option><option>Impuestos</option><option>Transporte</option><option>Otros</option></select></div><div><label>Monto (ARS)</label><input name="monto" type="number" min=".01" step=".01" required></div><div><label>Fecha</label><input name="fecha" type="date" value="'+new Date().toISOString().slice(0,10)+'" required></div></div><label>Descripción</label><input name="descripcion" maxlength="200"><div class="form-actions"><button>Guardar movimiento</button></div></form>');$("cashForm").onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector("button");b.disabled=true;const f=e.target,v={comercio_id:profile.comercio_id,tipo:f.elements.tipo.value,categoria:f.elements.categoria.value,monto:Number(f.elements.monto.value),fecha:f.elements.fecha.value,descripcion:f.elements.descripcion.value.trim()||null};try{if(!Number.isFinite(v.monto)||v.monto<=0)throw new Error("El monto debe ser mayor a cero.");const {error}=await db.from("caja_movimientos").insert(v);if(error)throw error;closeModal();appMessage("Movimiento registrado.");await renderPage();}catch(err){appMessage(err.message,true);b.disabled=false;}};}
 
