@@ -195,7 +195,7 @@ tbody tr:hover{background:#f8faff}
 <div id="authMessage" class="message" role="status" aria-live="polite"></div></main></div>
 <div id="publicStoreView" class="public-store hidden"></div>
 <div id="appView" class="app hidden"><aside class="sidebar"><header class="brand"><div class="mark">N</div><div><h1>NexoVentas</h1><p>Panel de gestión</p></div></header>
-<nav class="nav" id="navigation"><button data-page="dashboard" class="active">▦ &nbsp; Resumen</button><button data-page="productos">▣ &nbsp; Productos</button><button data-page="publicaciones">✧ &nbsp; Publicaciones</button><button data-page="tienda">🏪 &nbsp; Mi tienda</button><button data-page="envios">🚚 &nbsp; Envíos</button><button data-page="pedidos_tienda">🛒 &nbsp; Pedidos online</button><button data-page="rubros">▦ &nbsp; Rubros</button><button data-page="sucursales">▤ &nbsp; Sucursales</button><button data-page="precios">＄ &nbsp; Listas de precios</button><button data-page="servicios">✧ &nbsp; Servicios</button><button data-page="stock">▤ &nbsp; Stock</button><button data-page="clientes">♙ &nbsp; Clientes</button><button data-page="pedidos">▧ &nbsp; Ventas</button><button data-page="presupuestos">▧ &nbsp; Presupuestos</button><button data-page="proveedores">♧ &nbsp; Proveedores</button><button data-page="compras">▣ &nbsp; Compras</button><button data-page="caja">▤ &nbsp; Caja</button><button data-page="reportes">▥ &nbsp; Reportes</button><button data-page="historial">▤ &nbsp; Historial mensual</button><button data-page="usuarios">♙ &nbsp; Usuarios</button><button data-page="auditoria">▤ &nbsp; Auditoría</button><button data-page="asistente">✦ &nbsp; Asistente</button></nav>
+<nav class="nav" id="navigation"><button data-page="dashboard" class="active">▦ &nbsp; Resumen</button><button data-page="productos">▣ &nbsp; Productos</button><button data-page="publicaciones">✧ &nbsp; Publicaciones</button><button data-page="tienda">🏪 &nbsp; Mi tienda</button><button data-page="envios">🚚 &nbsp; Envíos</button><button data-page="medios_cobro">💳 &nbsp; Medios de cobro</button><button data-page="pedidos_tienda">🛒 &nbsp; Pedidos online</button><button data-page="rubros">▦ &nbsp; Rubros</button><button data-page="sucursales">▤ &nbsp; Sucursales</button><button data-page="precios">＄ &nbsp; Listas de precios</button><button data-page="servicios">✧ &nbsp; Servicios</button><button data-page="stock">▤ &nbsp; Stock</button><button data-page="clientes">♙ &nbsp; Clientes</button><button data-page="pedidos">▧ &nbsp; Ventas</button><button data-page="presupuestos">▧ &nbsp; Presupuestos</button><button data-page="proveedores">♧ &nbsp; Proveedores</button><button data-page="compras">▣ &nbsp; Compras</button><button data-page="caja">▤ &nbsp; Caja</button><button data-page="reportes">▥ &nbsp; Reportes</button><button data-page="historial">▤ &nbsp; Historial mensual</button><button data-page="usuarios">♙ &nbsp; Usuarios</button><button data-page="auditoria">▤ &nbsp; Auditoría</button><button data-page="asistente">✦ &nbsp; Asistente</button></nav>
 <div class="side-bottom"><button id="logoutButton" class="secondary" style="width:100%">Cerrar sesión</button></div></aside>
 <main class="main"><header class="topbar"><strong id="businessTitle">Mi comercio</strong><span id="userEmail" class="muted small"></span><span id="userRole" class="badge"></span><button id="logoutTop" class="secondary">Salir</button></header><div class="content"><div id="appMessage"></div><div id="pageContent"></div></div></main></div>
 <div id="modalRoot"></div>
@@ -220,7 +220,7 @@ let currentUser=null,profile=null,currentPage="dashboard",busy=false,cart=[];
 const $=id=>document.getElementById(id);
 const authCard=document.querySelector("#authView .auth-card");if(authCard&&!document.getElementById("marketplaceEntry"))authCard.insertAdjacentHTML("beforeend",'<p class="links" id="marketplaceEntry"><a class="link" href="?marketplace=1">Explorar marketplace sin registrarte</a></p>');
 const isAdmin=()=>profile?.rol==="admin";
-const adminPages=new Set(["tienda","envios","rubros","sucursales","precios","servicios","proveedores","compras","caja","reportes","historial","usuarios","auditoria"]);
+const adminPages=new Set(["tienda","envios","medios_cobro","rubros","sucursales","precios","servicios","proveedores","compras","caja","reportes","historial","usuarios","auditoria"]);
 function syncRoleUI(){document.body.classList.toggle("role-vendedor",!isAdmin());$("userRole").textContent=isAdmin()?"Administrador":"Vendedor";document.querySelectorAll("#navigation [data-page]").forEach(b=>b.classList.toggle("hidden",!isAdmin()&&adminPages.has(b.dataset.page)));}
 const money=n=>new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:2}).format(Number(n)||0);
 const safe=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -462,6 +462,45 @@ async function renderPage(){
     try{const {error}=await db.from("envios_zonas").delete().eq("id",z.id).eq("comercio_id",profile.comercio_id);if(error)throw error;appMessage("Destino eliminado.");await renderPage();}
     catch(err){appMessage(err.message,true);button.disabled=false;}
    });
+  }else if(currentPage==="medios_cobro"){
+   if(!isAdmin())throw new Error("Solo el administrador del comercio puede configurar los medios de cobro.");
+   const {data:bank,error:bankError}=await db.from("medios_cobro_transferencia").select("*").eq("comercio_id",profile.comercio_id).maybeSingle();
+   if(bankError)throw bankError;
+   let mpConnected=false,mpLive=false,mpError="";
+   try{
+    const {data:{session}}=await db.auth.getSession();
+    const statusResponse=await fetch(SUPABASE_URL+"/functions/v1/mercadopago-conectar",{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+session.access_token}});
+    const status=await statusResponse.json();if(!statusResponse.ok)throw new Error(status.error||"No se pudo consultar Mercado Pago.");
+    mpConnected=!!status.connected;mpLive=!!status.live_mode;
+   }catch(err){mpError=err.message||"No se pudo consultar Mercado Pago.";}
+   root.innerHTML=heading("Medios de cobro","Configurá cómo va a recibir el dinero cada vendedor. Las cuentas pertenecen al comercio, no a NexoVentas.")+
+    '<section class="panel"><div class="page-head"><div><h3>Mercado Pago</h3><p class="muted small">Cada vendedor autoriza su propia cuenta desde Mercado Pago. NexoVentas nunca solicita su contraseña.</p></div><span class="badge">'+(mpConnected?(mpLive?'Producción':'Pruebas'):'Sin conectar')+'</span></div>'+
+    (mpError?'<p class="toast error">'+safe(mpError)+'</p>':'')+
+    (mpConnected?'<p>La cuenta de Mercado Pago de este comercio está vinculada. Los pagos se procesan con la autorización de este vendedor.</p>':'<button id="connectMercadoPago">Conectar mi Mercado Pago</button>')+
+    '</section>'+
+    '<section class="panel"><h3>Transferencia bancaria</h3><p class="muted small">Cargá el CBU o CVU, alias y titular que el comprador deberá usar para transferir directamente al comercio.</p>'+
+    '<form id="sellerTransferForm"><div class="form-grid"><div><label>Titular de la cuenta *</label><input name="titular" required maxlength="120" value="'+safe(bank?.titular||'')+'"></div><div><label>Banco o billetera</label><input name="entidad" maxlength="100" value="'+safe(bank?.entidad||'')+'" placeholder="Ej.: Banco Nación"></div><div><label>Tipo de cuenta *</label><select name="tipo_cuenta"><option value="cbu" '+(bank?.tipo_cuenta!=="cvu"?'selected':'')+'>CBU</option><option value="cvu" '+(bank?.tipo_cuenta==="cvu"?'selected':'')+'>CVU</option></select></div><div><label>CBU / CVU *</label><input name="identificador" required maxlength="40" value="'+safe(bank?.identificador||'')+'"></div><div><label>Alias</label><input name="alias" maxlength="100" value="'+safe(bank?.alias||'')+'"></div></div><label>Instrucciones para el comprador</label><textarea name="instrucciones" maxlength="500">'+safe(bank?.instrucciones||'')+'</textarea><label style="display:flex;align-items:center;gap:9px"><input name="activo" type="checkbox" style="width:auto" '+(bank?.activo?'checked':'')+'> Dejar este medio preparado como activo</label><div class="form-actions"><button id="saveSellerTransfer">Guardar datos bancarios</button></div></form></section>'+
+    '<section class="panel"><h3>Importante</h3><p class="muted small">Por seguridad, estos datos solo los ve el administrador del comercio. La transferencia bancaria todavía no se ofrece en el checkout público ni se acredita automáticamente; antes de habilitarla agregaremos la confirmación del pago y la validación del comprobante.</p></section>';
+   const connectButton=$("connectMercadoPago");
+   if(connectButton)connectButton.onclick=async()=>{
+    connectButton.disabled=true;connectButton.textContent="Conectando…";
+    try{
+     const {data:{session}}=await db.auth.getSession();
+     const response=await fetch(SUPABASE_URL+"/functions/v1/mercadopago-conectar",{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:"{}"});
+     const result=await response.json();if(!response.ok)throw new Error(result.error||"No se pudo iniciar la conexión.");
+     window.location.assign(result.authorization_url);
+    }catch(err){appMessage(err.message,true);connectButton.disabled=false;connectButton.textContent="Conectar mi Mercado Pago";}
+   };
+   $("sellerTransferForm").onsubmit=async e=>{
+    e.preventDefault();const form=e.target,button=$("saveSellerTransfer");button.disabled=true;
+    try{
+     const values={comercio_id:profile.comercio_id,titular:form.elements.titular.value.trim(),entidad:form.elements.entidad.value.trim()||null,tipo_cuenta:form.elements.tipo_cuenta.value,identificador:form.elements.identificador.value.trim(),alias:form.elements.alias.value.trim()||null,instrucciones:form.elements.instrucciones.value.trim()||null,activo:form.elements.activo.checked,updated_at:new Date().toISOString()};
+     if(!/^[0-9A-Za-z. -]{6,40}$/.test(values.identificador))throw new Error("Revisá el CBU/CVU ingresado.");
+     const result=bank?await db.from("medios_cobro_transferencia").update(values).eq("id",bank.id).eq("comercio_id",profile.comercio_id):await db.from("medios_cobro_transferencia").insert(values);
+     if(result.error)throw result.error;
+     appMessage("Datos bancarios guardados de forma privada.");await renderPage();
+    }catch(err){appMessage(err.message||"No se pudieron guardar los datos.",true);button.disabled=false;}
+   };
   }else if(currentPage==="pedidos_tienda"){
    const rows=await loadRows("pedidos_tienda");
    const statusOptions=["pendiente","confirmado","preparando","listo","entregado","cancelado"];
