@@ -1,0 +1,25 @@
+-- Supporting indexes for the multisector schema foreign keys.
+create index if not exists categorias_comercio_parent_idx on public.categorias_comercio(parent_id);
+create index if not exists categorias_comercio_rubro_idx on public.categorias_comercio(rubro_id);
+create index if not exists comercio_rubros_rubro_idx on public.comercio_rubros(rubro_id);
+create index if not exists inventario_mov_destino_idx on public.inventario_movimientos(comercio_id,deposito_destino_id);
+create index if not exists inventario_mov_origen_idx on public.inventario_movimientos(comercio_id,deposito_origen_id);
+create index if not exists inventario_mov_variante_idx on public.inventario_movimientos(comercio_id,variante_id);
+create index if not exists inventario_mov_usuario_idx on public.inventario_movimientos(usuario_id);
+create index if not exists inventario_saldos_variante_idx on public.inventario_saldos(comercio_id,variante_id);
+create index if not exists lista_precios_items_comercio_idx on public.lista_precios_items(comercio_id);
+create index if not exists lista_precios_items_lista_idx on public.lista_precios_items(comercio_id,lista_precio_id);
+create index if not exists lista_precios_items_producto_idx on public.lista_precios_items(comercio_id,producto_id);
+create index if not exists lista_precios_items_variante_idx on public.lista_precios_items(comercio_id,variante_id);
+create index if not exists producto_variantes_producto_idx on public.producto_variantes(comercio_id,producto_id);
+create index if not exists productos_categoria_idx on public.productos(comercio_id,categoria_comercio_id);
+create index if not exists productos_unidad_idx on public.productos(unidad_medida_id);
+create index if not exists rubros_parent_idx on public.rubros(parent_id);
+create index if not exists servicio_solicitudes_cliente_idx on public.servicio_solicitudes(comercio_id,cliente_id);
+create index if not exists servicio_solicitudes_comercio_idx on public.servicio_solicitudes(comercio_id);
+create index if not exists servicio_solicitudes_servicio_idx on public.servicio_solicitudes(comercio_id,servicio_id);
+create index if not exists servicio_turnos_cliente_idx on public.servicio_turnos(comercio_id,cliente_id);
+create index if not exists servicio_turnos_comercio_idx on public.servicio_turnos(comercio_id);
+create index if not exists servicio_turnos_servicio_idx on public.servicio_turnos(comercio_id,servicio_id);
+create index if not exists servicio_turnos_sucursal_idx on public.servicio_turnos(comercio_id,sucursal_id);
+create index if not exists servicios_categoria_idx on public.servicios(comercio_id,categoria_comercio_id);
