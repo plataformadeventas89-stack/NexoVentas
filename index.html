@@ -492,7 +492,11 @@ async function renderPage(){
    root.querySelectorAll("[data-order-status]").forEach(sel=>sel.onchange=async()=>{
     const order=rows.find(x=>x.id===sel.dataset.orderStatus);sel.disabled=true;
     try{
-     if(sel.value==="cancelado"&&order?.estado_pago==="pagado")throw new Error("El pedido ya está pagado. Primero gestioná el reembolso en Mercado Pago.");
+     if(sel.value==="cancelado"){
+      const {error}=await db.rpc("cancelar_pedido_tienda",{p_pedido_id:sel.dataset.orderStatus});if(error)throw error;
+      appMessage("Pedido cancelado y stock reservado liberado.");await renderPage();return;
+     }
+     if(sel.value==="entregado"&&order?.estado_pago!=="pagado")throw new Error("No se puede marcar como entregado un pedido sin pago confirmado.");
      const {data,error}=await db.from("pedidos_tienda").update({estado:sel.value,updated_at:new Date().toISOString()}).eq("id",sel.dataset.orderStatus).eq("comercio_id",profile.comercio_id).select("id").maybeSingle();
      if(error)throw error;if(!data)throw new Error("No se pudo actualizar el pedido.");appMessage("Estado del pedido actualizado.");
     }catch(err){appMessage(err.message,true);await renderPage();}
