@@ -31,3 +31,6 @@ revoke all on function public.registrar_venta_en_deposito(uuid,uuid,jsonb) from 
 grant execute on function public.registrar_venta_en_deposito(uuid,uuid,jsonb) to authenticated;
 revoke all on function public.registrar_presupuesto(uuid,jsonb) from public,anon;
 grant execute on function public.registrar_presupuesto(uuid,jsonb) to authenticated;
+
+create index if not exists pedidos_comercio_lista_precio_idx on public.pedidos(comercio_id,lista_precio_id);
+create index if not exists presupuestos_comercio_lista_precio_idx on public.presupuestos(comercio_id,lista_precio_id);
