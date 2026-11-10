@@ -4,14 +4,14 @@ declare
   v_oid oid;
   v_definition text;
   v_marker text := ' for v_group in
-  select x.product_id,x.variante_id,sum(x.cantidad)::numeric(14,3) cantidad
+  select x.producto_id,x.variante_id,sum(x.cantidad)::numeric(14,3) cantidad
   from jsonb_to_recordset(p_items) as x(producto_id uuid,variante_id uuid,cantidad numeric)
-  group by x.product_id,x.variante_id order by x.product_id,x.variante_id nulls first
+  group by x.producto_id,x.variante_id order by x.producto_id,x.variante_id nulls first
  loop';
   v_insert text := ' for v_group in
-  select x.product_id,sum(x.cantidad)::numeric(14,3) cantidad
+  select x.producto_id,sum(x.cantidad)::numeric(14,3) cantidad
   from jsonb_to_recordset(p_items) as x(product_id uuid,cantidad numeric)
-  group by x.product_id order by x.product_id
+  group by x.producto_id order by x.producto_id
  loop
   if v_group.product_id is null or v_group.cantidad is null or v_group.cantidad<=0 then
    raise exception ''Hay productos o cantidades inválidas'';
