@@ -351,7 +351,7 @@ async function renderPublicStore(slug){
     const form=$("storeCheckoutForm"),button=$("checkShipping"),results=$("shippingQuoteResults");
     const localidad=form.elements.localidad.value.trim(),provincia=form.elements.provincia.value.trim(),codigo_postal=form.elements.codigo_postal.value.trim();
     if(localidad.length<2||provincia.length<2||codigo_postal.length<4){results.innerHTML='<p class="toast error">Completá localidad, provincia y código postal para consultar las opciones.</p>';return;}
-    button.disabled=true;button.textContent="Consultando…";results.innerHTML='<p class="muted small">Buscando transportes disponibles para tu domicilio…</p>';
+    selectedShipping=null;shippingOptions=[];$("sendStoreOrder").disabled=true;button.disabled=true;button.textContent="Consultando…";results.innerHTML='<p class="muted small">Buscando transportes disponibles para tu domicilio…</p>';
     try{
      const subtotal=cartItems.reduce((n,x)=>n+x.precio*x.cantidad,0);
      const response=await fetch(SUPABASE_URL+"/functions/v1/envios-publicos",{method:"POST",headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({slug:business.slug,localidad,provincia,codigo_postal,subtotal})});
@@ -496,7 +496,7 @@ async function renderPage(){
       const {error}=await db.rpc("cancelar_pedido_tienda",{p_pedido_id:sel.dataset.orderStatus});if(error)throw error;
       appMessage("Pedido cancelado y stock reservado liberado.");await renderPage();return;
      }
-     if(sel.value==="entregado"&&order?.estado_pago!=="pagado")throw new Error("No se puede marcar como entregado un pedido sin pago confirmado.");
+     if(sel.value==="entregado")throw new Error("Marcá el pedido como entregado desde la sección de seguimiento, después de despacharlo.");
      const {data,error}=await db.from("pedidos_tienda").update({estado:sel.value,updated_at:new Date().toISOString()}).eq("id",sel.dataset.orderStatus).eq("comercio_id",profile.comercio_id).select("id").maybeSingle();
      if(error)throw error;if(!data)throw new Error("No se pudo actualizar el pedido.");appMessage("Estado del pedido actualizado.");
     }catch(err){appMessage(err.message,true);await renderPage();}
