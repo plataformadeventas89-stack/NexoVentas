@@ -139,7 +139,7 @@ async function renderPage(){
     const minYear=Math.min(new Date().getFullYear(),...(allDates.length?allDates:[new Date().getFullYear()]));
     const maxYear=new Date().getFullYear();
     $("historyYear").innerHTML=Array.from({length:maxYear-minYear+1},(_,i)=>maxYear-i).map(y=>'<option value="'+y+'">'+y+'</option>').join("");
-    const defaultDate=new Date();defaultDate.setMonth(defaultDate.getMonth()-1);
+    const defaultDate=new Date();
     $("historyMonth").value=String(defaultDate.getMonth());$("historyYear").value=String(defaultDate.getFullYear());
     const fmtDate=v=>v?new Date(v).toLocaleDateString("es-AR"):"—";
     const sum=(arr,field)=>arr.reduce((a,x)=>a+Number(x[field]||0),0);
