@@ -150,7 +150,7 @@ async function renderPage(){
       const month=Number($("historyMonth").value),year=Number($("historyYear").value),mode=$("historyCompare").value,term=$("historySearch").value.trim().toLocaleLowerCase("es");
       const start=new Date(year,month,1),end=new Date(year,month+1,1);
       const compareStart=mode==="year"?new Date(year-1,month,1):new Date(year,month-1,1);
-      const compareEnd=mode==="year"?new Date(year,month+1,1):new Date(year,month,1);
+      const compareEnd=mode==="year"?new Date(year-1,month+1,1):new Date(year,month,1);
       const periodSales=sales.filter(x=>inPeriod(x.created_at,start,end)&&isSale(x));
       const compareSales=sales.filter(x=>inPeriod(x.created_at,compareStart,compareEnd)&&isSale(x));
       const saleIds=new Set(periodSales.map(x=>x.id)),compareIds=new Set(compareSales.map(x=>x.id));
