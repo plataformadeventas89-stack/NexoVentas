@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexoVentas | Plataforma inteligente de ventas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg,#101b35,#172e55);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; color: #17233c;
+    }
+    .container {
+      width: 100%; max-width: 440px;
+      background: white; border-radius: 22px;
+      padding: 34px; box-shadow: 0 20px 60px #0005;
+    }
+    .logo { text-align: center; margin-bottom: 28px; }
+    .logo-mark {
+      display: inline-flex; width: 52px; height: 52px;
+      align-items: center; justify-content: center;
+      border-radius: 15px; background: #1769e0;
+      color: white; font-size: 27px; font-weight: bold;
+    }
+    h1 { margin: 12px 0 5px; font-size: 27px; }
+    .subtitle { color: #778197; font-size: 14px; }
+    h2 { font-size: 21px; margin-bottom: 8px; }
+    .description { color: #778197; font-size: 14px; margin-bottom: 23px; }
+    label { display: block; font-size: 13px; font-weight: bold; margin: 15px 0 7px; }
+    input {
+      width: 100%; padding: 14px; border: 1px solid #dce2ec;
+      border-radius: 10px; font-size: 15px; outline: none;
+    }
+    input:focus { border-color: #1769e0; }
+    button {
+      width: 100%; padding: 15px; border: 0;
+      border-radius: 10px; background: #1769e0;
+      color: white; font-weight: bold; font-size: 15px;
+      margin-top: 22px; cursor: pointer;
+    }
+    button:disabled { opacity: .6; }
+    .links { text-align: center; margin-top: 20px; font-size: 14px; }
+    a { color: #1769e0; text-decoration: none; cursor: pointer; }
+    .message { font-size: 13px; margin-top: 15px; line-height: 1.5; }
+    .hidden { display: none; }
+    .footer { text-align: center; color: #9aa3b3; font-size: 11px; margin-top: 25px; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="logo">
+      <div class="logo-mark">N</div>
+      <h1>NexoVentas</h1>
+      <div class="subtitle">Tu negocio conectado. Tus ventas bajo control.</div>
+    </header>
+
+    <section id="login">
+      <h2>Bienvenido nuevamente</h2>
+      <p class="description">Ingresá a tu plataforma de ventas.</p>
+      <form id="loginForm">
+        <label>Correo electrónico</label>
+        <input id="loginEmail" type="email" placeholder="tu@email.com" required>
+        <label>Contraseña</label>
+        <input id="loginPassword" type="password" placeholder="Tu contraseña" required>
+        <button type="submit">Iniciar sesión</button>
+      </form>
+      <div class="links">
+        <a onclick="show('recover')">¿Olvidaste tu contraseña?</a>
+        <p>¿Todavía no tenés cuenta? <a onclick="show('register')">Crear cuenta</a></p>
+      </div>
+    </section>
+
+    <section id="register" class="hidden">
+      <h2>Crear cuenta</h2>
+      <p class="description">Comenzá a administrar tu negocio con NexoVentas.</p>
+      <form id="registerForm">
+        <label>Nombre del comercio</label>
+        <input id="businessName" type="text" placeholder="Mi comercio" required>
+        <label>Tu nombre</label>
+        <input id="userName" type="text" placeholder="Nombre y apellido" required>
+        <label>Correo electrónico</label>
+        <input id="registerEmail" type="email" placeholder="tu@email.com" required>
+        <label>Contraseña</label>
+        <input id="registerPassword" type="password" minlength="8" placeholder="Mínimo 8 caracteres" required>
+        <button type="submit">Crear mi cuenta</button>
+      </form>
+      <div class="links">¿Ya tenés cuenta? <a onclick="show('login')">Iniciar sesión</a></div>
+    </section>
+
+    <section id="recover" class="hidden">
+      <h2>Recuperar contraseña</h2>
+      <p class="description">Te enviaremos un enlace para restablecerla.</p>
+      <form id="recoverForm">
+        <label>Correo electrónico</label>
+        <input id="recoverEmail" type="email" placeholder="tu@email.com" required>
+        <button type="submit">Enviar enlace</button>
+      </form>
+      <div class="links"><a onclick="show('login')">Volver al inicio de sesión</a></div>
+    </section>
+
+    <div id="message" class="message" role="status"></div>
+    <div class="footer">NexoVentas © 2026 · Plataforma inteligente de ventas</div>
+  </main>
+
+<script>
+  // CONFIGURACIÓN: completaremos estos dos datos desde Supabase.
+  const SUPABASE_URL = "PEGAR_URL_DE_SUPABASE";
+  const SUPABASE_ANON_KEY = "PEGAR_CLAVE_PUBLICA_ANON";
+
+  const configured =
+    SUPABASE_URL.startsWith("https://") &&
+    SUPABASE_ANON_KEY !== "PEGAR_CLAVE_PUBLICA_ANON";
+
+  const supabaseClient = configured
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  function show(section) {
+    ["login", "register", "recover"].forEach(id =>
+      document.getElementById(id).classList.add("hidden")
+    );
+    document.getElementById(section).classList.remove("hidden");
+    document.getElementById("message").textContent = "";
+  }
+
+  function notify(message, error = false) {
+    const box = document.getElementById("message");
+    box.textContent = message;
+    box.style.color = error ? "#c0392b" : "#16834b";
+  }
+
+  function checkConfig() {
+    if (!configured) {
+      notify("La conexión con Supabase todavía no está configurada.", true);
+      return false;
+    }
+    return true;
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!checkConfig()) return;
+
+    const button = e.target.querySelector("button");
+    button.disabled = true;
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: document.getElementById("loginEmail").value.trim(),
+      password: document.getElementById("loginPassword").value
+    });
+    button.disabled = false;
+
+    if (error) notify(error.message, true);
+    else notify("¡Sesión iniciada! La conexión está funcionando.");
+  });
+
+  document.getElementById("registerForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!checkConfig()) return;
+
+    const button = e.target.querySelector("button");
+    button.disabled = true;
+
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: document.getElementById("registerEmail").value.trim(),
+      password: document.getElementById("registerPassword").value,
+      options: {
+        data: {
+          nombre_comercio: document.getElementById("businessName").value.trim(),
+          nombre_usuario: document.getElementById("userName").value.trim()
+        }
+      }
+    });
+
+    button.disabled = false;
+
+    if (error) notify(error.message, true);
+    else if (data.session) {
+      notify("Cuenta creada. El registro del comercio se completará en el siguiente paso.");
+    } else {
+      notify("¡Cuenta creada! Revisá tu correo para confirmar el registro.");
+    }
+  });
+
+  document.getElementById("recoverForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!checkConfig()) return;
+
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(
+      document.getElementById("recoverEmail").value.trim()
+    );
+
+    if (error) notify(error.message, true);
+    else notify("Si el correo está registrado, recibirás un enlace para recuperar tu contraseña.");
+  });
+</script>
+</body>
+</html>
