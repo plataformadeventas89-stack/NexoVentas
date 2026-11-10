@@ -71,6 +71,96 @@ img,svg,video{max-width:100%}
  .cart-row{grid-template-columns:minmax(0,1fr) 72px auto}
 }
 
+
+/* NexoVentas visual polish — premium SaaS design system */
+:root{
+ --nv-ink:#14213b;--nv-muted:#71809a;--nv-blue:#2563eb;--nv-blue-dark:#1747b5;
+ --nv-line:#e6ebf3;--nv-surface:#fff;--nv-canvas:#f5f7fb;
+ --nv-shadow:0 10px 30px rgba(20,39,75,.055);
+ --nv-radius:16px;
+}
+body{background:var(--nv-canvas);color:var(--nv-ink);letter-spacing:-.012em}
+button{background:linear-gradient(135deg,#2c70ee,#1d56c7);box-shadow:0 4px 10px rgba(37,99,235,.14);transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+button:hover{filter:brightness(1.035);box-shadow:0 7px 16px rgba(37,99,235,.2);transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(59,130,246,.25);outline-offset:2px}
+button.secondary{background:#edf3ff;color:#2458b7;box-shadow:none}
+button.ghost{box-shadow:none}
+button.danger{background:#fff1f1;color:#b42318;box-shadow:none}
+input,select,textarea{border-color:#dce4f0;border-radius:10px;transition:border-color .15s ease,box-shadow .15s ease}
+input:focus,select:focus,textarea:focus{outline:0;border-color:#78a5fa;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+label{color:#34435d;font-size:12px;letter-spacing:.015em}
+.muted{color:var(--nv-muted)}
+.auth-wrap{background:radial-gradient(ellipse at 18% 12%,rgba(56,126,255,.28),transparent 38%),radial-gradient(ellipse at 88% 85%,rgba(30,91,190,.3),transparent 35%),linear-gradient(135deg,#0b1730 0%,#142b50 55%,#10203d 100%);position:relative;isolation:isolate}
+.auth-wrap:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 90%)}
+.auth-card{border:1px solid rgba(255,255,255,.72);border-radius:24px;padding:34px;box-shadow:0 28px 90px rgba(0,0,0,.28);animation:nv-enter .35s ease both}
+.auth-card h2{font-size:25px;letter-spacing:-.035em;color:#14213b}
+.auth-card .brand{margin-bottom:30px}
+.mark{background:linear-gradient(145deg,#438bff,#1554c5);border-radius:14px;box-shadow:0 7px 18px rgba(37,99,235,.25)}
+.brand h1{letter-spacing:-.04em;font-weight:800}
+.auth-card form button{min-height:46px}
+.link{text-decoration:none;font-weight:650}
+.link:hover{text-decoration:underline}
+.app{background:var(--nv-canvas)}
+.sidebar{background:linear-gradient(180deg,#111f3b 0%,#0d1930 100%);padding:24px 14px;border-right:1px solid rgba(255,255,255,.06);box-shadow:5px 0 22px rgba(14,28,54,.045)}
+.sidebar .brand{padding:0 9px}
+.sidebar .brand h1{color:#fff;font-size:21px}
+.sidebar .mark{background:linear-gradient(145deg,#438bff,#1554c5)}
+.nav{gap:4px}
+.nav button{position:relative;border-radius:10px;padding:10px 12px;color:#b9c7df;font-size:13px;transition:background .15s ease,color .15s ease}
+.nav button.active{background:linear-gradient(90deg,rgba(54,119,237,.28),rgba(54,119,237,.1));color:#fff;box-shadow:inset 3px 0 #5c9aff}
+.nav button:hover{background:rgba(255,255,255,.075);color:#fff;transform:none;box-shadow:none}
+.sidebar .side-bottom button{background:rgba(255,255,255,.09);color:#e3ebf9;border:1px solid rgba(255,255,255,.1)}
+.main{background:var(--nv-canvas)}
+.topbar{background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--nv-line);padding:0 30px;min-height:74px}
+.topbar strong{font-size:14px;font-weight:750;letter-spacing:-.015em}
+.content{padding:30px;max-width:1320px}
+.page-head{margin-bottom:23px}
+.page-head h2{font-size:27px;font-weight:780;letter-spacing:-.04em;color:#172642}
+.page-head p{font-size:13px;color:#7a879c}
+.cards{gap:16px;margin-bottom:24px}
+.stat,.panel{border:1px solid var(--nv-line);border-radius:var(--nv-radius);box-shadow:var(--nv-shadow);background:var(--nv-surface)}
+.stat{padding:20px;position:relative;overflow:hidden}
+.stat:after{content:"";position:absolute;right:-25px;top:-32px;width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(59,130,246,0))}
+.stat span{font-size:12px;font-weight:650;letter-spacing:.015em;color:#78869d}
+.stat strong{font-size:28px;font-weight:780;letter-spacing:-.04em;color:#192b4a}
+.panel{padding:21px;margin-bottom:18px}
+.panel h3{font-size:15px;font-weight:750;color:#263653}
+.table-wrap{border:1px solid #edf0f5;border-radius:11px}
+table{font-size:13px}
+th{background:#f8fafd;color:#7a879c;font-size:11px;letter-spacing:.045em;text-transform:uppercase}
+th:first-child{border-top-left-radius:10px}
+th:last-child{border-top-right-radius:10px}
+td{color:#35435c}
+tbody tr:hover{background:#f8faff}
+.badge{background:#edf4ff;color:#2458b7;font-weight:700}
+.toast{border:1px solid #ccebd8;border-radius:12px}
+.toast.error{border-color:#f3d0d0}
+.insight{border-radius:13px;background:linear-gradient(145deg,#f8faff,#f1f6ff);border-color:#e5ecf7}
+.modal{border:1px solid #e8edf5;border-radius:18px;box-shadow:0 24px 80px rgba(12,27,52,.24)}
+.modal-head{padding-bottom:14px;border-bottom:1px solid #edf0f5;margin-bottom:14px}
+.modal-head h3{font-size:18px;letter-spacing:-.025em}
+.empty{font-size:13px}
+@keyframes nv-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:850px){
+ .sidebar{background:#101d37;border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 5px 18px rgba(14,28,54,.08)}
+ .nav button.active{box-shadow:inset 0 -2px #6aa4ff}
+ .topbar{padding:9px 16px}
+ .content{padding:19px}
+}
+@media(max-width:600px){
+ .auth-card{border-radius:20px;padding:23px}
+ .auth-card h2{font-size:23px}
+ .topbar{background:#fff}
+ .content{padding:15px 12px 26px}
+ .page-head h2{font-size:23px}
+ .stat,.panel{box-shadow:0 5px 18px rgba(20,39,75,.045)}
+ .stat{padding:14px}
+ .stat strong{font-size:22px}
+ .panel{padding:15px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
