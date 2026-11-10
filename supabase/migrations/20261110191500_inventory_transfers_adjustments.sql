@@ -152,3 +152,7 @@ revoke all on function public.registrar_transferencia_inventario(uuid,uuid,text,
 revoke all on function public.registrar_ajuste_inventario(uuid,uuid,uuid,numeric,text) from public,anon;
 grant execute on function public.registrar_transferencia_inventario(uuid,uuid,text,jsonb) to authenticated;
 grant execute on function public.registrar_ajuste_inventario(uuid,uuid,uuid,numeric,text) to authenticated;
+
+create index if not exists inventario_transferencia_detalles_producto_idx on public.inventario_transferencia_detalles(comercio_id,producto_id);
+create index if not exists inventario_transferencia_detalles_variante_idx on public.inventario_transferencia_detalles(comercio_id,variante_id);
+create index if not exists inventario_transferencias_usuario_idx on public.inventario_transferencias(usuario_id);
