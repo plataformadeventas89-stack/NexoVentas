@@ -293,6 +293,74 @@ tbody tr:hover{background:#f8faff}
 @media(max-width:850px){.nv-dashboard-columns{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.nv-dashboard-welcome{padding:22px 19px;border-radius:16px;margin-bottom:21px}.nv-dashboard-welcome-mark{width:54px;height:54px;flex-basis:54px;border-radius:17px;font-size:30px}.nv-dashboard-welcome h2{font-size:23px}.nv-dashboard-welcome p{font-size:12px}.nv-dashboard-cards{gap:9px}.nv-dashboard-cards .stat{min-height:137px;padding:13px}.nv-dashboard-cards .stat strong{font-size:21px}.nv-dashboard-section-title>small{display:none}.nv-dashboard-columns{gap:11px}}
 
+
+
+/* NexoVentas Premium UI system */
+#appView{--nv-ink:#172744;--nv-muted:#73819a;--nv-blue:#245bd5;--nv-violet:#7653d6;--nv-line:#e5ebf4;--nv-surface:#fff;background:#f5f7fc;color:var(--nv-ink)}
+#appView .sidebar{position:sticky;top:0;height:100vh;min-height:100vh;overflow-y:auto;background:linear-gradient(180deg,#142747 0%,#101d36 100%);padding:24px 15px 18px;gap:25px;box-shadow:8px 0 28px rgba(18,35,65,.07)}
+#appView .sidebar .brand{display:flex;align-items:center;gap:11px;margin:0 7px 4px}
+#appView .sidebar .brand .mark{width:42px;height:42px;flex:0 0 42px;border-radius:14px;background:linear-gradient(145deg,#5b8ff5,#7959dc);box-shadow:0 7px 18px #0003;font-size:23px}
+#appView .sidebar .brand h1{font-size:20px;letter-spacing:-.045em;color:#fff}
+#appView .sidebar .brand p{font-size:11px;letter-spacing:.025em;color:#aab9d2}
+#appView .nav{gap:5px}
+#appView .nav button{position:relative;display:flex;align-items:center;min-height:41px;padding:10px 12px;border:1px solid transparent;border-radius:10px;background:transparent;color:#bfcee4;font-size:13px;font-weight:600;letter-spacing:.005em;transition:background .18s ease,color .18s ease,transform .18s ease}
+#appView .nav button:hover{background:#ffffff12;color:#fff;transform:translateX(2px)}
+#appView .nav button.active{background:linear-gradient(100deg,#315fb7,#4b67b9);border-color:#ffffff20;color:#fff;box-shadow:0 6px 15px #071a3b55}
+#appView .nav button.active:before{content:"";position:absolute;left:-15px;top:8px;bottom:8px;width:3px;border-radius:0 4px 4px 0;background:#9bbaff}
+#appView .side-bottom{padding:10px 4px 0;border-top:1px solid #ffffff1b}
+#appView .side-bottom button{border:1px solid #ffffff24!important;background:#ffffff0d!important;color:#dce6f5!important;border-radius:10px}
+#appView .main{background:#f5f7fc;min-height:100vh}
+#appView .topbar{position:sticky;top:0;z-index:20;min-height:72px;padding:0 clamp(18px,3vw,38px);background:#ffffffed;border-bottom:1px solid #e7ecf4;backdrop-filter:blur(14px);box-shadow:0 3px 15px #1b31500a}
+#appView .topbar>strong{font-size:15px;font-weight:750;letter-spacing:-.02em;color:#1c2e4d}
+#appView .topbar #userEmail{font-size:12px}
+#appView .content{max-width:1480px;padding:30px clamp(18px,3vw,38px) 48px}
+#appView .page-head{margin-bottom:23px;align-items:center}
+#appView .page-head h2{font-size:clamp(23px,2vw,29px);font-weight:800;letter-spacing:-.045em;color:#182b4b}
+#appView .page-head p{font-size:13px;color:#7a879c}
+#appView .stat,#appView .panel{border:1px solid #e6ebf3;border-radius:16px;background:#fff;box-shadow:0 5px 18px rgba(27,48,83,.035);transition:box-shadow .18s ease,border-color .18s ease}
+#appView .panel{padding:21px;margin-bottom:18px}
+#appView .panel h3{font-size:15px;font-weight:750;letter-spacing:-.015em;color:#243653}
+#appView .stat{padding:19px}
+#appView .stat span{font-size:12px;font-weight:600;color:#7a879c}
+#appView .stat strong{font-size:27px;font-weight:800;letter-spacing:-.04em;color:#1d3152}
+#appView .table-wrap{border-radius:12px}
+#appView table{font-size:13px}
+#appView th{padding:13px 11px;background:#f7f9fd;color:#75839a;font-size:10px;letter-spacing:.075em;text-transform:uppercase;border-bottom:1px solid #e8edf5}
+#appView td{padding:13px 11px;color:#394a64;border-bottom:1px solid #edf1f6}
+#appView tbody tr:hover td{background:#f9fbff}
+#appView label{display:block;margin:0 0 7px;color:#53627a;font-size:12px;font-weight:700}
+#appView input:not([type=checkbox]):not([type=radio]),#appView select,#appView textarea{border:1px solid #dfe6f0;border-radius:10px;background:#fff;color:#233550;padding:11px 12px;min-height:42px;outline:none;transition:border-color .16s ease,box-shadow .16s ease}
+#appView input:focus,#appView select:focus,#appView textarea:focus{border-color:#7ea2ed;box-shadow:0 0 0 3px #3975e51a}
+#appView button{border-radius:10px;font-weight:700;transition:transform .16s ease,box-shadow .16s ease,background .16s ease}
+#appView button:not(.secondary):not(.nav button){box-shadow:0 4px 10px #245bd51a}
+#appView button:not(:disabled):hover{filter:brightness(1.025)}
+#appView button:not(:disabled):active{transform:translateY(1px)}
+#appView button.secondary{border:1px solid #dce4ef;background:#fff;color:#52627b;box-shadow:none}
+#appView .badge{padding:6px 10px;border:1px solid #e0e9f8;border-radius:30px;background:#f0f5ff;color:#315da9;font-weight:750;font-size:11px}
+#appView .toast{border:1px solid #d5efdf;border-radius:12px;padding:13px 15px}
+#appView .toast.error{border-color:#f4d9d9}
+#appView .empty{border:1px dashed #dce4ef;border-radius:12px;background:#fafcff}
+#appView .modal{border:1px solid #e5eaf2;border-radius:18px;box-shadow:0 24px 70px #14274730}
+#appView .modal-head{border-bottom:1px solid #edf1f6;padding-bottom:14px}
+#appView .form-actions{gap:10px}
+@media(max-width:850px){
+ #appView .sidebar{position:relative;top:auto;height:auto;min-height:0;padding:10px 12px 7px;gap:8px;box-shadow:0 5px 18px #14274712}
+ #appView .nav{gap:6px;padding:2px 0 7px}
+ #appView .nav button{min-height:38px;padding:9px 12px;border-radius:9px;font-size:12px}
+ #appView .nav button.active:before{display:none}
+ #appView .topbar{position:relative;top:auto;min-height:58px;padding:10px 16px}
+ #appView .content{padding:20px 16px 34px}
+}
+@media(max-width:600px){
+ #appView .content{padding:16px 12px 28px}
+ #appView .page-head h2{font-size:22px}
+ #appView .panel{padding:15px}
+ #appView .stat{padding:14px}
+ #appView .stat strong{font-size:22px}
+ #appView th,#appView td{padding:10px 8px}
+ #appView .nav button{font-size:11px;padding:9px 10px}
+}
+
 </style>
 </head>
 <body>
