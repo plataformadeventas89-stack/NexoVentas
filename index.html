@@ -1457,19 +1457,28 @@ async function saveProduct(e){
   saved=true;
   const initialStock=Math.max(0,Number(f.elements.stock_inicial?.value||0));
   if(!f.elements.id.value){
+   const depotResult=await db.from("depositos").select("id").eq("comercio_id",profile.comercio_id).eq("es_principal",true).maybeSingle();
+   if(depotResult.error)warnings.push("No se pudo consultar el depósito principal: "+depotResult.error.message);
+   const mainDepot=depotResult.data||null;
    const stockResult=await db.from("stock").upsert(
-    {comercio_id:profile.comercio_id,producto_id:productId,cantidad:initialStock},
+    {comercio_id:profile.comercio_id,producto_id:productId,cantidad:mainDepot?0:initialStock},
     {onConflict:"comercio_id,producto_id"}
    );
    if(stockResult.error)warnings.push("El producto se guardó, pero no se pudo actualizar el stock general: "+stockResult.error.message);
-   const depotResult=await db.from("depositos").select("id").eq("comercio_id",profile.comercio_id).eq("es_principal",true).maybeSingle();
-   if(depotResult.error)warnings.push("No se pudo consultar el depósito principal: "+depotResult.error.message);
-   else if(depotResult.data){
-    const inventoryResult=await db.from("inventario_saldos").upsert(
-     {comercio_id:profile.comercio_id,deposito_id:depotResult.data.id,producto_id:productId,cantidad:initialStock,variante_id:null},
-     {onConflict:"comercio_id,deposito_id,producto_id,variante_id"}
-    );
-    if(inventoryResult.error)warnings.push("El producto se guardó, pero no se pudo registrar el stock del depósito: "+inventoryResult.error.message);
+   else if(mainDepot){
+    if(initialStock>0){
+     const adjustment=await db.rpc("registrar_ajuste_inventario",{
+      p_deposito_id:mainDepot.id,p_producto_id:productId,p_variante_id:null,
+      p_cantidad_objetivo:initialStock,p_motivo:"Stock inicial al crear el producto"
+     });
+     if(adjustment.error)warnings.push("El producto se guardó, pero no se pudo registrar el stock inicial: "+adjustment.error.message);
+    }else{
+     const inventoryResult=await db.from("inventario_saldos").upsert(
+      {comercio_id:profile.comercio_id,deposito_id:mainDepot.id,producto_id:productId,cantidad:0,variante_id:null},
+      {onConflict:"comercio_id,deposito_id,producto_id,variante_id"}
+     );
+     if(inventoryResult.error)warnings.push("El producto se guardó, pero no se pudo registrar el saldo inicial del depósito: "+inventoryResult.error.message);
+    }
    }else warnings.push("El producto se guardó, pero todavía no hay un depósito principal para asignarle stock.");
   }
   let images=[];
