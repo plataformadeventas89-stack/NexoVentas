@@ -183,6 +183,74 @@ tbody tr:hover{background:#f8faff}
 @media(max-width:560px){.store-products{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.store-product-info{padding:10px}.store-product-info h3{font-size:14px}.store-price{font-size:18px}.store-header{padding:25px 15px}.store-content{padding:18px 11px 35px}.store-logo{width:58px;height:58px}.store-tools input,.store-tools select{max-width:none;flex:1 1 100%}}
 .shipping-method{border-left:4px solid #2563eb}.shipping-method .page-head{margin-bottom:10px}.shipping-zone-details{margin-top:14px;padding:12px;border:1px solid #e6ebf3;border-radius:12px;background:#f8faff}.shipping-zone-details summary{cursor:pointer;color:#2458b7;font-weight:750;padding:5px}.shipping-zone-form{padding-top:10px}.shipping-check{display:flex;align-items:center;gap:9px;margin:12px 0}.shipping-check input{width:auto}.shipping-method h4{margin:18px 0 10px;font-size:14px}@media(max-width:600px){.shipping-method .page-head{flex-direction:column}.shipping-method .page-head .toolbar{width:100%}}\n
 .shipping-quote-results{margin:14px 0;padding:13px;border:1px solid #e3eaf5;border-radius:12px;background:#f8faff}.shipping-quote-list{display:grid;gap:8px}.shipping-quote-option{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0;padding:12px;border:1px solid #dfe7f3;border-radius:10px;background:#fff;cursor:pointer}.shipping-quote-option>span{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:3px 8px}.shipping-quote-option input{width:auto;grid-row:span 2}.shipping-quote-option small{color:#758198;font-weight:400}.shipping-quote-total{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #e3eaf5}.shipping-quote-total strong:last-child{color:#1769e0;font-size:18px}
+
+/* NexoVentas marketplace home refresh */
+.nv-marketplace{min-height:100vh;background:#f7f9fd;color:#17233c;font-family:Inter,system-ui,Arial,sans-serif}
+.nv-market-header{height:76px;background:#fff;border-bottom:1px solid #e9eef6;position:relative;z-index:2}
+.nv-market-header-inner{width:min(1180px,calc(100% - 40px));height:100%;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.nv-market-brand{display:inline-flex;align-items:center;gap:10px;color:#17233c;text-decoration:none;font-size:20px;font-weight:850;letter-spacing:-.04em}
+.nv-market-brand small{display:block;font-size:9px;letter-spacing:.17em;color:#74829a;font-weight:800;margin-top:2px}
+.nv-market-logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#438bff,#1554c5);color:white;display:grid;place-items:center;font-size:23px;font-weight:900;box-shadow:0 6px 15px #2563eb30}
+.nv-market-nav{display:flex;align-items:center;gap:26px}
+.nv-market-nav a,.nv-market-footer>a:last-child{font-size:13px;color:#53627a;text-decoration:none;font-weight:700}
+.nv-market-nav .nv-nav-active{color:#2563eb}
+.nv-market-nav .nv-seller-link{background:#edf4ff;color:#2059c4;padding:11px 16px;border-radius:11px}
+.nv-market-hero{background:linear-gradient(110deg,#eef5ff 0%,#f5f8ff 55%,#e8f1ff 100%);position:relative;overflow:hidden;min-height:390px;display:flex;align-items:center}
+.nv-market-hero-inner{width:min(1180px,calc(100% - 40px));margin:0 auto;position:relative;z-index:1;padding:62px 0 58px}
+.nv-market-eyebrow{font-size:10px;font-weight:850;letter-spacing:.16em;color:#3972cf}
+.nv-market-hero h1{font-size:clamp(38px,5vw,60px);line-height:1.03;letter-spacing:-.06em;margin:17px 0 14px;color:#14213b;font-weight:850}
+.nv-market-hero h1 em{font-style:normal;color:#2563eb}
+.nv-market-hero-inner>p{max-width:510px;color:#63718a;font-size:16px;line-height:1.65;margin:0 0 24px}
+.nv-market-search{display:flex;align-items:center;gap:10px;width:min(650px,100%);padding:7px 7px 7px 17px;background:#fff;border:1px solid #e1e9f5;border-radius:15px;box-shadow:0 14px 36px #23477c12}
+.nv-market-search>span{font-size:26px;color:#7b8ba5}
+.nv-market-search input{border:0!important;box-shadow:none!important;outline:0!important;padding:12px 4px;font-size:14px;min-width:0}
+.nv-market-search button{white-space:nowrap;border-radius:11px;padding:13px 23px;background:#2563eb;box-shadow:0 5px 13px #2563eb30}
+.nv-market-hero-note{font-size:11px;color:#71809a;margin-top:14px}
+.nv-market-hero-note span{color:#14804a;font-weight:900;margin-right:5px}
+.nv-market-hero-art{position:absolute;right:max(4%,calc((100% - 1180px)/2));top:50%;transform:translateY(-50%);width:340px;height:300px}
+.nv-market-art-circle{position:absolute;width:260px;height:260px;border-radius:50%;right:28px;top:20px;background:linear-gradient(145deg,#d6e6ff,#fff);border:1px solid #fff;box-shadow:inset 0 0 50px #b5d0ff55}
+.nv-market-art-card{position:absolute;z-index:1;display:grid;place-items:center;background:#fff;border:1px solid #e8eef8;border-radius:23px;box-shadow:0 18px 45px #183b7020}
+.nv-art-one{width:112px;height:112px;right:112px;top:87px;font-size:54px;transform:rotate(-8deg)}
+.nv-art-two{width:72px;height:72px;right:20px;top:48px;font-size:32px;transform:rotate(9deg)}
+.nv-art-three{width:80px;height:80px;right:20px;bottom:34px;font-size:34px;transform:rotate(8deg)}
+.nv-market-benefits{width:min(1180px,calc(100% - 40px));margin:-1px auto 0;padding:24px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;border-bottom:1px solid #e8edf5}
+.nv-market-benefits>div{display:grid;grid-template-columns:42px 1fr;column-gap:10px;align-items:center}
+.nv-market-benefits>div>span{grid-row:span 2;width:40px;height:40px;border-radius:12px;background:#edf4ff;display:grid;place-items:center;color:#2563eb;font-size:18px}
+.nv-market-benefits strong{font-size:13px;color:#273650}
+.nv-market-benefits small{font-size:11px;color:#7b879b;margin-top:3px}
+.nv-market-catalog{width:min(1180px,calc(100% - 40px));margin:0 auto;padding:52px 0 60px}
+.nv-market-section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:22px}
+.nv-market-section-head h2,.nv-market-seller-cta h2{font-size:clamp(24px,3vw,32px);letter-spacing:-.045em;color:#172642;margin:8px 0 6px}
+.nv-market-section-head p,.nv-market-seller-cta p{font-size:13px;color:#78869b;margin:0}
+.nv-market-count{white-space:nowrap;background:#edf3fc;color:#45658f;border-radius:30px;padding:8px 12px;font-size:11px;font-weight:750}
+.nv-market-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px}
+.nv-market-card{background:#fff;border:1px solid #e7edf5;border-radius:16px;overflow:hidden;box-shadow:0 7px 22px #1c3b6b0a;transition:transform .18s,box-shadow .18s}
+.nv-market-card:hover{transform:translateY(-3px);box-shadow:0 15px 30px #1c3b6b16}
+.nv-market-photo{display:block;aspect-ratio:4/3;background:#f0f4fa;text-decoration:none}
+.nv-market-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.nv-market-no-photo{height:100%;display:grid;place-items:center;color:#9aa8bc;font-size:15px;font-weight:800;letter-spacing:.04em}
+.nv-market-card-body{padding:14px}
+.nv-market-store{font-size:10px;color:#75839a;font-weight:700}
+.nv-market-card h3{font-size:15px;line-height:1.35;min-height:40px;margin:7px 0;color:#263550}
+.nv-market-price{font-size:22px;font-weight:850;letter-spacing:-.04em;color:#205fcf;margin:5px 0}
+.nv-market-availability{font-size:10px;color:#16804b;font-weight:750}
+.nv-market-availability.is-off{color:#9a6b21}
+.nv-market-location{font-size:11px;color:#7c899d;margin:7px 0 0}
+.nv-market-card-actions{border-top:1px solid #eef1f6;margin-top:12px;padding-top:11px}
+.nv-market-card-actions a{font-size:12px;color:#2563eb;font-weight:800;text-decoration:none}
+.nv-market-empty{padding:48px 20px;text-align:center;background:#fff;border:1px dashed #dce5f1;border-radius:16px;color:#74829a}
+.nv-market-empty-icon{font-size:34px;color:#91a8cb}
+.nv-market-empty h3{color:#263550;margin:8px 0}
+.nv-market-empty p{font-size:13px;margin:0}
+.nv-market-seller-cta{margin-top:44px;border-radius:20px;padding:28px 32px;background:linear-gradient(110deg,#eaf2ff,#f4f7ff);border:1px solid #e0eafa;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.nv-market-seller-cta h2{font-size:23px;margin:7px 0}
+.nv-market-seller-cta a{white-space:nowrap;text-decoration:none;background:#2563eb;color:white;padding:13px 18px;border-radius:11px;font-size:12px;font-weight:800;box-shadow:0 6px 14px #2563eb25}
+.nv-market-footer{background:#fff;border-top:1px solid #e8edf5;padding:24px max(20px,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:18px}
+.nv-market-footer>span{font-size:11px;color:#8490a2}
+@media(max-width:900px){.nv-market-hero-art{right:0;opacity:.72;transform:translate(12%,-50%) scale(.8)}.nv-market-hero-inner{padding-right:160px}.nv-market-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.nv-market-header{height:auto}.nv-market-header-inner{width:calc(100% - 28px);padding:12px 0;align-items:flex-start}.nv-market-brand{font-size:18px}.nv-market-logo{width:38px;height:38px}.nv-market-nav{gap:10px;flex-wrap:wrap;justify-content:flex-end}.nv-market-nav a{font-size:11px}.nv-market-nav .nv-seller-link{padding:9px 10px}.nv-market-hero{min-height:0}.nv-market-hero-inner{width:calc(100% - 32px);padding:43px 0 38px}.nv-market-hero h1{font-size:43px}.nv-market-hero-inner>p{font-size:14px;max-width:95%}.nv-market-hero-art{opacity:.14;right:-95px;transform:translateY(-50%) scale(.78)}.nv-market-search{gap:5px;padding-left:10px}.nv-market-search input{font-size:12px}.nv-market-search button{padding:12px 14px;font-size:12px}.nv-market-benefits{width:calc(100% - 32px);grid-template-columns:1fr;gap:13px;padding:19px 0}.nv-market-benefits>div{grid-template-columns:38px 1fr}.nv-market-benefits>div>span{width:36px;height:36px}.nv-market-catalog{width:calc(100% - 32px);padding:36px 0 42px}.nv-market-section-head{align-items:flex-start;flex-direction:column}.nv-market-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.nv-market-card{border-radius:12px}.nv-market-card-body{padding:10px}.nv-market-card h3{font-size:13px;min-height:35px}.nv-market-price{font-size:18px}.nv-market-seller-cta{padding:22px 18px;align-items:flex-start;flex-direction:column;margin-top:30px}.nv-market-seller-cta h2{font-size:21px}.nv-market-footer{padding:20px 16px;flex-wrap:wrap}.nv-market-footer>span{order:3;width:100%}}
+@media(max-width:360px){.nv-market-nav{gap:7px}.nv-market-nav a{font-size:10px}.nv-market-hero h1{font-size:38px}.nv-market-grid{gap:8px}}
+
 </style>
 </head>
 <body>
@@ -281,12 +349,14 @@ async function renderMarketplacePublic(){
   const payload=await response.json();if(!response.ok)throw new Error(payload.error||"No se pudo cargar el marketplace.");
   const products=payload.products||[];
   const photo=p=>(Array.isArray(p.imagenes)&&p.imagenes.length?p.imagenes:(p.imagen_url?[p.imagen_url]:[])).filter(Boolean)[0]||"";
-  const render=list=>list.length?'<div class="store-products">'+list.map(p=>{
+  const render=list=>list.length?'<div class="nv-market-grid">'+list.map(p=>{
    const biz=p.comercios||{},image=photo(p),storeUrl=PUBLIC_URL+"?tienda="+encodeURIComponent(biz.tienda_slug||"");
-   return '<article class="store-product">'+(image?'<img src="'+safe(image)+'" alt="'+safe(p.nombre)+'" loading="lazy">':'<div class="store-no-image">Sin fotografía</div>')+'<div class="store-product-info"><span class="muted small">'+safe(biz.nombre||"Comercio")+'</span><h3>'+safe(p.nombre)+'</h3><div class="store-price">'+money(p.precio)+'</div><span class="store-status '+(p.disponible?"":"off")+'">'+(p.disponible?"Disponible":"Consultar disponibilidad")+'</span><p>'+safe([biz.localidad,biz.provincia].filter(Boolean).join(", "))+'</p><p>'+safe((p.descripcion||"").slice(0,110))+'</p><div class="store-actions"><a class="button-link" href="'+safe(storeUrl)+'">Visitar tienda</a></div></div></article>';
-  }).join("")+'</div>':'<div class="store-empty">Todavía no hay productos publicados en el marketplace.</div>';
-  root.innerHTML='<header class="store-header"><div class="store-header-inner"><div class="store-brand"><div class="store-logo" style="display:grid;place-items:center;font-size:28px;font-weight:800">N</div><div><h1>Marketplace NexoVentas</h1><p>Descubrí productos de comercios independientes</p></div></div><div class="store-meta"><a style="color:white" href="'+PUBLIC_URL+'">Ingresar a NexoVentas</a></div></div></header><main class="store-content"><div class="store-tools"><input id="marketplaceSearch" placeholder="Buscar productos, comercios o localidades…"><span class="muted small" id="marketplaceCount">'+products.length+' productos</span></div><div id="marketplaceResults">'+render(products)+'</div></main><footer class="store-footer"><a href="'+PUBLIC_URL+'">Ingresar</a> · Marketplace creado con NexoVentas</footer>';
-  $("marketplaceSearch").addEventListener("input",()=>{const q=$("marketplaceSearch").value.trim().toLocaleLowerCase("es");const list=products.filter(p=>[p.nombre,p.descripcion,p.marca,p.comercios?.nombre,p.comercios?.localidad,p.comercios?.provincia].join(" ").toLocaleLowerCase("es").includes(q));$("marketplaceCount").textContent=list.length+" productos";$("marketplaceResults").innerHTML=render(list);});
+   return '<article class="nv-market-card"><a class="nv-market-photo" href="'+safe(storeUrl)+'">'+(image?'<img src="'+safe(image)+'" alt="'+safe(p.nombre)+'" loading="lazy">':'<span class="nv-market-no-photo">NexoVentas</span>')+'</a><div class="nv-market-card-body"><span class="nv-market-store">'+safe(biz.nombre||"Comercio")+'</span><h3>'+safe(p.nombre)+'</h3><div class="nv-market-price">'+money(p.precio)+'</div><span class="nv-market-availability '+(p.disponible?"":"is-off")+'">'+(p.disponible?"Disponible":"Consultar disponibilidad")+'</span><p class="nv-market-location">'+safe([biz.localidad,biz.provincia].filter(Boolean).join(", "))+'</p><div class="nv-market-card-actions"><a href="'+safe(storeUrl)+'">Ver producto y comprar <span aria-hidden="true">→</span></a></div></div></article>';
+  }).join("")+'</div>':'<div class="nv-market-empty"><div class="nv-market-empty-icon">⌕</div><h3>No encontramos productos</h3><p>Probá con otra búsqueda o volvé a explorar el catálogo.</p></div>';
+  root.innerHTML='<div class="nv-marketplace"><header class="nv-market-header"><div class="nv-market-header-inner"><a class="nv-market-brand" href="'+PUBLIC_URL+'?marketplace=1" aria-label="NexoVentas inicio"><span class="nv-market-logo">N</span><span>NexoVentas<small>MARKETPLACE</small></span></a><nav class="nv-market-nav"><a class="nv-nav-active" href="'+PUBLIC_URL+'?marketplace=1">Explorar</a><a href="'+PUBLIC_URL+'">Ingresar</a><a class="nv-seller-link" href="'+PUBLIC_URL+'">Vender con NexoVentas</a></nav></div></header><main><section class="nv-market-hero"><div class="nv-market-hero-inner"><span class="nv-market-eyebrow">COMPRÁ EN COMERCIOS DE TU COMUNIDAD</span><h1>Encontrá eso que<br><em>estás buscando.</em></h1><p>Descubrí productos de tiendas independientes y contactá directamente con cada comercio.</p><form class="nv-market-search" id="marketplaceSearchForm"><span aria-hidden="true">⌕</span><input id="marketplaceSearch" type="search" placeholder="¿Qué estás buscando hoy?" aria-label="Buscar productos, comercios o localidades"><button type="submit">Buscar</button></form><div class="nv-market-hero-note"><span>✓</span> Explorá tiendas independientes · Comprá directo al comercio</div></div><div class="nv-market-hero-art" aria-hidden="true"><div class="nv-market-art-card nv-art-one">🛍️</div><div class="nv-market-art-card nv-art-two">✨</div><div class="nv-market-art-card nv-art-three">🏷️</div><div class="nv-market-art-circle"></div></div></section><section class="nv-market-benefits"><div><span>⌕</span><strong>Buscá fácil</strong><small>Encontrá lo que necesitás</small></div><div><span>🏪</span><strong>Comercios reales</strong><small>Conocé quién vende</small></div><div><span>💬</span><strong>Contacto directo</strong><small>Hablá con cada tienda</small></div></section><section class="nv-market-catalog"><div class="nv-market-section-head"><div><span class="nv-market-eyebrow">NUESTRO CATÁLOGO</span><h2>Productos para descubrir</h2><p>Opciones publicadas por comercios de NexoVentas.</p></div><span class="nv-market-count" id="marketplaceCount">'+products.length+' productos</span></div><div id="marketplaceResults">'+render(products)+'</div><div class="nv-market-seller-cta"><div><span class="nv-market-eyebrow">¿TENÉS UN COMERCIO?</span><h2>Tu próxima venta puede empezar acá.</h2><p>Creá tu tienda, publicá tus productos y llegá a nuevos compradores.</p></div><a href="'+PUBLIC_URL+'">Conocé NexoVentas <span aria-hidden="true">→</span></a></div></section></main><footer class="nv-market-footer"><a class="nv-market-brand" href="'+PUBLIC_URL+'?marketplace=1"><span class="nv-market-logo">N</span><span>NexoVentas<small>MARKETPLACE</small></span></a><span>Conectamos comercios con compradores.</span><a href="'+PUBLIC_URL+'">Ingresar a mi cuenta</a></footer></div>';
+  const applySearch=()=>{const q=$("marketplaceSearch").value.trim().toLocaleLowerCase("es");const list=products.filter(p=>[p.nombre,p.descripcion,p.marca,p.comercios?.nombre,p.comercios?.localidad,p.comercios?.provincia].join(" ").toLocaleLowerCase("es").includes(q));$("marketplaceCount").textContent=list.length+" "+(list.length===1?"producto":"productos");$("marketplaceResults").innerHTML=render(list);};
+  $("marketplaceSearch").addEventListener("input",applySearch);
+  $("marketplaceSearchForm").addEventListener("submit",e=>{e.preventDefault();applySearch();$("marketplaceResults").scrollIntoView({behavior:"smooth",block:"start"});});
  }catch(err){root.innerHTML='<div class="store-empty"><h2>Marketplace no disponible</h2><p>'+safe(err.message)+'</p><a href="'+PUBLIC_URL+'">Volver a NexoVentas</a></div>';}
 }
 
