@@ -646,6 +646,34 @@ tbody tr:hover{background:#f8faff}
 #appView .nv-spinner{width:28px;height:28px;border:3px solid #e3eaf6;border-top-color:#3267d7;border-radius:50%;animation:nv-spin .8s linear infinite}
 @keyframes nv-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){#appView .nv-spinner{animation:none;border-top-color:#3267d7}}
+
+/* Navegación móvil accesible y menú lateral desplazable */
+#appView .nv-mobile-menu{display:none;align-items:center;gap:7px;min-height:38px;padding:8px 12px;white-space:nowrap}
+@media(min-width:851px){
+ #appView .sidebar{position:sticky;top:0;height:100vh;min-height:100vh;overflow-y:auto;overscroll-behavior:contain}
+ #appView .nav{min-height:0}
+}
+@media(max-width:850px){
+ #appView .nv-mobile-menu{display:inline-flex}
+ #appView .sidebar{overflow:visible}
+ #appView .sidebar .brand{display:flex;align-items:center;gap:10px;padding:2px 4px 8px}
+ #appView .sidebar .brand .mark{width:34px;height:34px;font-size:18px;border-radius:10px}
+ #appView .sidebar .brand h1{font-size:16px}
+ #appView .sidebar .brand p{font-size:10px;margin-top:1px}
+ #appView .nav{display:none;flex-direction:column;align-items:stretch;overflow-y:auto;overflow-x:hidden;max-height:min(58svh,440px);padding:7px 0 2px;gap:4px}
+ #appView.mobile-nav-open .nav{display:flex}
+ #appView .nav button{width:100%;min-height:42px;text-align:left;white-space:normal;border-radius:9px;padding:10px 12px}
+ #appView .topbar{justify-content:flex-start}
+ #appView .topbar #businessTitle{flex:1 1 120px}
+ #appView .topbar #userEmail{flex:1 1 100%;order:5}
+ #appView .topbar #userRole{order:3}
+ #appView .topbar #logoutTop{order:4}
+}
+@media(max-width:420px){
+ #appView .topbar{gap:7px}
+ #appView .nv-mobile-menu{padding:8px 10px;font-size:12px}
+ #appView .topbar #businessTitle{font-size:13px}
+}
 </style>
 </head>
 <body>
@@ -677,7 +705,7 @@ tbody tr:hover{background:#f8faff}
 <div id="appView" class="app hidden"><aside class="sidebar"><header class="brand"><div class="mark">N</div><div><h1>NexoVentas</h1><p>Panel de gestión</p></div></header>
 <nav class="nav" id="navigation"><button data-page="dashboard" class="active">▦ &nbsp; Resumen</button><button data-page="productos">▣ &nbsp; Productos</button><button data-page="publicaciones">✧ &nbsp; Publicaciones</button><button data-page="tienda">🏪 &nbsp; Mi tienda</button><button data-page="envios">🚚 &nbsp; Envíos</button><button data-page="medios_cobro">💳 &nbsp; Medios de cobro</button><button data-page="pedidos_tienda">🛒 &nbsp; Pedidos online</button><button data-page="rubros">▦ &nbsp; Rubros</button><button data-page="sucursales">▤ &nbsp; Sucursales</button><button data-page="precios">＄ &nbsp; Listas de precios</button><button data-page="servicios">✧ &nbsp; Servicios</button><button data-page="stock">▤ &nbsp; Stock</button><button data-page="clientes">♙ &nbsp; Clientes</button><button data-page="pedidos">▧ &nbsp; Ventas</button><button data-page="presupuestos">▧ &nbsp; Presupuestos</button><button data-page="proveedores">♧ &nbsp; Proveedores</button><button data-page="compras">▣ &nbsp; Compras</button><button data-page="caja">▤ &nbsp; Caja</button><button data-page="reportes">▥ &nbsp; Reportes</button><button data-page="historial">▤ &nbsp; Historial mensual</button><button data-page="usuarios">♙ &nbsp; Usuarios</button><button data-page="auditoria">▤ &nbsp; Auditoría</button><button data-page="asistente">✦ &nbsp; Asistente</button></nav>
 <div class="side-bottom"><button id="logoutButton" class="secondary" style="width:100%">Cerrar sesión</button></div></aside>
-<main class="main"><header class="topbar"><strong id="businessTitle">Mi comercio</strong><span id="userEmail" class="muted small"></span><span id="userRole" class="badge"></span><button id="logoutTop" class="secondary">Salir</button></header><div class="content"><div id="appMessage"></div><div id="pageContent"></div></div></main></div>
+<main class="main"><header class="topbar"><button id="mobileMenuToggle" class="secondary nv-mobile-menu" type="button" aria-expanded="false" aria-controls="navigation">☰ Menú</button><strong id="businessTitle">Mi comercio</strong><span id="userEmail" class="muted small"></span><span id="userRole" class="badge"></span><button id="logoutTop" class="secondary">Salir</button></header><div class="content"><div id="appMessage"></div><div id="pageContent"></div></div></main></div>
 <div id="modalRoot"></div>
 <script>
 (async()=>{
@@ -745,7 +773,8 @@ $("passwordForm").addEventListener("submit",async e=>{e.preventDefault();const b
 async function logout(){const {error}=await db.auth.signOut();if(error){appMessage(error.message,true);return;}profile=null;currentUser=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden");showAuth("login");}
 $("logoutButton").addEventListener("click",logout);$("logoutTop").addEventListener("click",logout);
 db.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"){showAuth("password");return;}if(event==="SIGNED_IN"&&session?.user&&$("appView").classList.contains("hidden"))setTimeout(()=>enterApp(session.user),0);if(event==="SIGNED_OUT"){$("appView").classList.add("hidden");$("authView").classList.remove("hidden");}});
-$("navigation").addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(!b)return;if(!isAdmin()&&adminPages.has(b.dataset.page)){appMessage("Esta sección está disponible solo para administradores.",true);return;}currentPage=b.dataset.page;document.querySelectorAll("[data-page]").forEach(x=>x.classList.toggle("active",x===b));renderPage();});
+$("navigation").addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(!b)return;if(!isAdmin()&&adminPages.has(b.dataset.page)){appMessage("Esta sección está disponible solo para administradores.",true);return;}currentPage=b.dataset.page;document.querySelectorAll("[data-page]").forEach(x=>x.classList.toggle("active",x===b));$("appView").classList.remove("mobile-nav-open");$("mobileMenuToggle").setAttribute("aria-expanded","false");renderPage();});
+$("mobileMenuToggle").addEventListener("click",()=>{const open=$("appView").classList.toggle("mobile-nav-open");$("mobileMenuToggle").setAttribute("aria-expanded",String(open));});
 async function loadRows(table,fields="*",sort){const order=sort||((table==="stock"||table==="inventario_saldos")?"updated_at":"created_at");const {data,error}=await db.from(table).select(fields).eq("comercio_id",profile.comercio_id).order(order,{ascending:false});if(error)throw error;return data||[];}
 async function loadAllRows(table,fields="*",sort){const order=sort||((table==="stock"||table==="inventario_saldos")?"updated_at":"created_at");let all=[],from=0;while(true){const {data,error}=await db.from(table).select(fields).eq("comercio_id",profile.comercio_id).order(order,{ascending:false}).range(from,from+999);if(error)throw error;all=all.concat(data||[]);if(!data||data.length<1000)break;from+=1000;}return all;}
 function heading(title,desc,button=""){return '<div class="page-head"><div><h2>'+title+'</h2><p>'+desc+'</p></div>'+button+'</div>';}
