@@ -616,6 +616,29 @@ tbody tr:hover{background:#f8faff}
 }
 @media(max-width:380px){.public-store .store-products{grid-template-columns:1fr}}
 
+
+/* Tablas y formularios: búsqueda, paginación y estados coherentes */
+#appView .nv-table-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;flex-wrap:wrap}
+#appView .nv-table-search{display:flex;align-items:center;gap:8px;flex:1 1 230px;max-width:380px;margin:0;padding:0 11px;border:1px solid #e1e8f2;border-radius:11px;background:#fff;color:#8492a8}
+#appView .nv-table-search input{border:0!important;box-shadow:none!important;min-height:38px!important;padding:8px 0!important;background:transparent!important}
+#appView .nv-table-total{font-size:11px;color:#7b879a;font-weight:650}
+#appView .nv-table-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 2px 0;color:#75839a;font-size:11px}
+#appView .nv-table-pagination>div{display:flex;gap:7px}
+#appView .nv-table-pagination button{padding:8px 12px;font-size:11px;min-height:34px}
+#appView .nv-table-no-results{padding:12px;text-align:center}
+#appView .nv-sales-chart{margin-top:16px}
+#appView .nv-chart-bars{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:end;min-height:190px;padding:14px 4px 0}
+#appView .nv-chart-column{display:flex;flex-direction:column;align-items:center;justify-content:end;gap:8px;min-width:0;height:180px}
+#appView .nv-chart-column strong{font-size:10px;color:#66758d;max-width:100%;overflow-wrap:anywhere;text-align:center}
+#appView .nv-chart-track{height:125px;width:min(42px,70%);display:flex;align-items:end;overflow:hidden;border-radius:9px;background:#f0f4fb}
+#appView .nv-chart-track span{display:block;width:100%;min-height:3px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#7c8ff0,#3267d7);transition:height .25s ease}
+#appView .nv-chart-column small{font-size:11px;color:#71809a;text-transform:capitalize}
+#appView .empty{padding:24px 16px}
+#appView .empty strong{display:block;color:#43536d;font-size:13px}
+#appView .empty p{margin:6px 0 0}
+#appView form label{line-height:1.4}
+#appView input:disabled,#appView select:disabled,#appView textarea:disabled{background:#f4f6fa;color:#8a96a8;cursor:not-allowed}
+@media(max-width:600px){#appView .nv-table-tools{align-items:stretch}#appView .nv-table-search{max-width:none;flex-basis:100%}#appView .nv-table-pagination{align-items:flex-start;flex-direction:column}#appView .nv-table-pagination>div{width:100%}#appView .nv-table-pagination button{flex:1}#appView .nv-chart-bars{gap:5px;min-height:165px;padding-left:0;padding-right:0}#appView .nv-chart-column{height:155px;gap:6px}#appView .nv-chart-column strong{font-size:9px}#appView .nv-chart-track{height:105px;width:70%}#appView .nv-chart-column small{font-size:10px}}
 </style>
 </head>
 <body>
@@ -719,7 +742,36 @@ $("navigation").addEventListener("click",e=>{const b=e.target.closest("[data-pag
 async function loadRows(table,fields="*",sort){const order=sort||((table==="stock"||table==="inventario_saldos")?"updated_at":"created_at");const {data,error}=await db.from(table).select(fields).eq("comercio_id",profile.comercio_id).order(order,{ascending:false});if(error)throw error;return data||[];}
 async function loadAllRows(table,fields="*",sort){const order=sort||((table==="stock"||table==="inventario_saldos")?"updated_at":"created_at");let all=[],from=0;while(true){const {data,error}=await db.from(table).select(fields).eq("comercio_id",profile.comercio_id).order(order,{ascending:false}).range(from,from+999);if(error)throw error;all=all.concat(data||[]);if(!data||data.length<1000)break;from+=1000;}return all;}
 function heading(title,desc,button=""){return '<div class="page-head"><div><h2>'+title+'</h2><p>'+desc+'</p></div>'+button+'</div>';}
-function table(headers,rows){if(!rows.length)return '<div class="empty">Todavía no hay registros.</div>';return '<div class="table-wrap"><table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(v=>'<td>'+v+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';}
+let nvTableSequence=0;
+function table(headers,rows){
+ if(!rows.length)return '<div class="empty"><strong>Sin registros por ahora</strong><p class="muted small">Cuando haya información, la vas a encontrar acá.</p></div>';
+ const id="nv-table-"+(++nvTableSequence);
+ setTimeout(()=>updateNvTable(id),0);
+ return '<div class="nv-table-tools"><label class="nv-table-search"><span aria-hidden="true">⌕</span><input type="search" data-nv-table-search="'+id+'" placeholder="Buscar en esta tabla…" aria-label="Buscar en esta tabla"></label><span class="nv-table-total">'+rows.length+' '+(rows.length===1?'registro':'registros')+'</span></div><div class="table-wrap" data-nv-table="'+id+'" data-page="0"><table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(v=>'<td>'+v+'</td>').join("")+'</tr>').join("")+'</tbody></table></div><div class="nv-table-pagination" data-nv-table-pagination="'+id+'"><span class="nv-table-page-info" aria-live="polite"></span><div><button type="button" class="secondary" data-nv-table-prev="'+id+'" aria-label="Página anterior">Anterior</button><button type="button" class="secondary" data-nv-table-next="'+id+'" aria-label="Página siguiente">Siguiente</button></div></div>';
+}
+function updateNvTable(id){
+ const wrap=document.querySelector('[data-nv-table="'+id+'"]');if(!wrap)return;
+ const input=document.querySelector('[data-nv-table-search="'+id+'"]'),term=(input?.value||'').trim().toLocaleLowerCase('es');
+ const all=[...wrap.querySelectorAll('tbody tr')],filtered=all.filter(row=>row.textContent.toLocaleLowerCase('es').includes(term));
+ const pages=Math.max(1,Math.ceil(filtered.length/8));let page=Math.min(Number(wrap.dataset.page||0),pages-1);wrap.dataset.page=String(page);
+ all.forEach(row=>row.style.display='none');filtered.slice(page*8,(page+1)*8).forEach(row=>row.style.display='');
+ const info=document.querySelector('[data-nv-table-pagination="'+id+'"] .nv-table-page-info');
+ if(info)info.textContent=filtered.length?('Mostrando '+(page*8+1)+'–'+Math.min((page+1)*8,filtered.length)+' de '+filtered.length):'No hay coincidencias';
+ const prev=document.querySelector('[data-nv-table-prev="'+id+'"]'),next=document.querySelector('[data-nv-table-next="'+id+'"]');
+ if(prev)prev.disabled=page===0;if(next)next.disabled=page>=pages-1;
+ const empty=wrap.parentElement.querySelector('.nv-table-no-results');
+ if(!filtered.length&&!empty){const el=document.createElement('p');el.className='nv-table-no-results muted small';el.textContent='No encontramos resultados para esa búsqueda.';wrap.after(el);}
+ if(filtered.length&&empty)empty.remove();
+}
+document.addEventListener('input',e=>{const input=e.target.closest('[data-nv-table-search]');if(input){const id=input.dataset.nvTableSearch,wrap=document.querySelector('[data-nv-table="'+id+'"]');if(wrap)wrap.dataset.page='0';updateNvTable(id);}});
+document.addEventListener('click',e=>{const prev=e.target.closest('[data-nv-table-prev]'),next=e.target.closest('[data-nv-table-next]'),btn=prev||next;if(!btn)return;const id=btn.dataset.nvTablePrev||btn.dataset.nvTableNext,wrap=document.querySelector('[data-nv-table="'+id+'"]');if(!wrap)return;wrap.dataset.page=String(Math.max(0,Number(wrap.dataset.page||0)+(prev?-1:1)));updateNvTable(id);});
+function renderSalesChart(orders){
+ const now=new Date(),months=[];
+ for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),label:d.toLocaleDateString('es-AR',{month:'short'}),total:0});}
+ orders.forEach(o=>{const d=new Date(o.created_at),m=months.find(x=>x.key===d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));if(m)m.total+=Number(o.total||0);});
+ const max=Math.max(1,...months.map(m=>m.total));
+ return '<section class="panel nv-sales-chart"><div class="nv-dashboard-panel-head"><div><span>EVOLUCIÓN COMERCIAL</span><h3>Ventas de los últimos 6 meses</h3></div><span class="nv-dashboard-pill">Por mes</span></div><div class="nv-chart-bars" role="img" aria-label="Gráfico de ventas de los últimos seis meses">'+months.map(m=>'<div class="nv-chart-column"><strong>'+money(m.total)+'</strong><div class="nv-chart-track"><span style="height:'+Math.max(m.total?5:2,Math.round(m.total/max*100))+'%"></span></div><small>'+safe(m.label)+'</small></div>').join('')+'</div></section>';
+}
 function showModal(title,body){$("modalRoot").innerHTML='<div class="modal-backdrop" id="modalBackdrop"><section class="modal"><div class="modal-head"><h3>'+title+'</h3><button class="secondary" id="closeModal">Cerrar</button></div>'+body+'</section></div>';$("closeModal").onclick=closeModal;$("modalBackdrop").addEventListener("click",e=>{if(e.target.id==="modalBackdrop")closeModal();});}
 function closeModal(){$("modalRoot").innerHTML="";}
 
@@ -1023,7 +1075,7 @@ async function renderPage(){
   }else if(currentPage==="dashboard"){
    const [p,c,o,q,s]=await Promise.all([loadRows("productos","id,nombre,precio,activo"),loadRows("clientes","id,nombre"),loadRows("pedidos","id,total,estado,created_at"),loadRows("presupuestos","id,total,estado"),loadRows("stock","id,cantidad")]);
    const sold=o.reduce((a,x)=>a+Number(x.total||0),0),outOfStock=s.filter(x=>Number(x.cantidad)<=0).length;
-   root.innerHTML='<section class="nv-dashboard-welcome"><div><span class="nv-dashboard-kicker">PANEL DE CONTROL</span><h2>¡Hola, '+safe(profile?.nombre||"bienvenido/a")+'! 👋</h2><p>Este es el estado de tu comercio. Revisá tu actividad y seguí haciendo crecer tus ventas.</p></div><div class="nv-dashboard-welcome-mark">N</div></section><div class="nv-dashboard-section-title"><div><span>EN UN VISTAZO</span><h3>Resumen de tu negocio</h3></div><small>Datos de tu comercio</small></div><div class="cards nv-dashboard-cards"><div class="stat nv-stat-blue"><div class="nv-stat-icon">▣</div><span>Productos activos</span><strong>'+p.filter(x=>x.activo).length+'</strong><small>En tu catálogo</small></div><div class="stat nv-stat-violet"><div class="nv-stat-icon">♙</div><span>Clientes</span><strong>'+c.length+'</strong><small>Registrados</small></div><div class="stat nv-stat-green"><div class="nv-stat-icon">▧</div><span>Ventas registradas</span><strong>'+o.length+'</strong><small>Operaciones</small></div><div class="stat nv-stat-amber"><div class="nv-stat-icon">$</div><span>Total vendido</span><strong>'+money(sold)+'</strong><small>Acumulado registrado</small></div></div><div class="nv-dashboard-columns"><section class="panel nv-dashboard-panel"><div class="nv-dashboard-panel-head"><div><span>ÚLTIMOS MOVIMIENTOS</span><h3>Actividad reciente</h3></div><span class="nv-dashboard-pill">Ventas</span></div>'+table(["Fecha","Estado","Total"],o.slice(0,7).map(x=>[new Date(x.created_at).toLocaleDateString("es-AR"),safe(x.estado),money(x.total)]))+'</section><section class="panel nv-dashboard-alert"><div class="nv-dashboard-panel-head"><div><span>CONTROL DE STOCK</span><h3>Inventario</h3></div><span class="nv-dashboard-alert-icon">!</span></div><strong>'+outOfStock+'</strong><p>'+(outOfStock===1?"producto sin existencias registradas":"productos sin existencias registradas")+'</p><small>Revisá el stock para evitar perder oportunidades de venta.</small></section></div>';
+   root.innerHTML='<section class="nv-dashboard-welcome"><div><span class="nv-dashboard-kicker">PANEL DE CONTROL</span><h2>¡Hola, '+safe(profile?.nombre||"bienvenido/a")+'! 👋</h2><p>Este es el estado de tu comercio. Revisá tu actividad y seguí haciendo crecer tus ventas.</p></div><div class="nv-dashboard-welcome-mark">N</div></section><div class="nv-dashboard-section-title"><div><span>EN UN VISTAZO</span><h3>Resumen de tu negocio</h3></div><small>Datos de tu comercio</small></div><div class="cards nv-dashboard-cards"><div class="stat nv-stat-blue"><div class="nv-stat-icon">▣</div><span>Productos activos</span><strong>'+p.filter(x=>x.activo).length+'</strong><small>En tu catálogo</small></div><div class="stat nv-stat-violet"><div class="nv-stat-icon">♙</div><span>Clientes</span><strong>'+c.length+'</strong><small>Registrados</small></div><div class="stat nv-stat-green"><div class="nv-stat-icon">▧</div><span>Ventas registradas</span><strong>'+o.length+'</strong><small>Operaciones</small></div><div class="stat nv-stat-amber"><div class="nv-stat-icon">$</div><span>Total vendido</span><strong>'+money(sold)+'</strong><small>Acumulado registrado</small></div></div><div class="nv-dashboard-columns"><section class="panel nv-dashboard-panel"><div class="nv-dashboard-panel-head"><div><span>ÚLTIMOS MOVIMIENTOS</span><h3>Actividad reciente</h3></div><span class="nv-dashboard-pill">Ventas</span></div>'+table(["Fecha","Estado","Total"],o.slice(0,7).map(x=>[new Date(x.created_at).toLocaleDateString("es-AR"),safe(x.estado),money(x.total)]))+'</section><section class="panel nv-dashboard-alert"><div class="nv-dashboard-panel-head"><div><span>CONTROL DE STOCK</span><h3>Inventario</h3></div><span class="nv-dashboard-alert-icon">!</span></div><strong>'+outOfStock+'</strong><p>'+(outOfStock===1?"producto sin existencias registradas":"productos sin existencias registradas")+'</p><small>Revisá el stock para evitar perder oportunidades de venta.</small></section></div>'+renderSalesChart(o)+';
   }else if(currentPage==="productos"){
    const [rows,categories,unitResult]=await Promise.all([
     loadRows("productos"),
