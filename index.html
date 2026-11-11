@@ -361,6 +361,101 @@ tbody tr:hover{background:#f8faff}
  #appView .nav button{font-size:11px;padding:9px 10px}
 }
 
+
+
+/* NexoVentas visual identity — photo-led premium experience */
+:root{--nv-brand:#245bd5;--nv-violet:#7653d6;--nv-ink:#172744;--nv-muted:#73819a;--nv-soft:#f4f7fc}
+#authView.auth-wrap{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:flex-end;min-height:100svh;padding:42px max(5vw,calc((100vw - 1420px)/2));overflow:hidden;background:#101d36}
+#authView.auth-wrap:before{content:"";position:absolute;inset:0;z-index:-2;background-image:linear-gradient(90deg,rgba(10,23,46,.28) 0%,rgba(10,23,46,.38) 42%,rgba(10,23,46,.88) 72%,#101d36 100%),url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=2000&q=85");background-size:cover;background-position:center}
+#authView.auth-wrap:after{content:"TU NEGOCIO,\A MÁS CERCA DE\A TU PRÓXIMA VENTA.";white-space:pre-line;position:absolute;left:max(6vw,calc((100vw - 1320px)/2));top:50%;transform:translateY(-50%);width:min(46%,620px);color:#fff;font-size:clamp(36px,5.1vw,68px);line-height:1.03;font-weight:850;letter-spacing:-.065em;text-shadow:0 5px 35px #07152b80}
+#authView .auth-card{position:relative;z-index:1;width:min(100%,450px);padding:34px;border:1px solid #ffffff80;border-radius:25px;background:rgba(255,255,255,.96);box-shadow:0 28px 90px #06152c70;backdrop-filter:blur(16px)}
+#authView .brand{margin-bottom:30px}
+#authView .brand .mark{width:48px;height:48px;border-radius:15px;background:linear-gradient(145deg,#438bff,#7653d6);box-shadow:0 9px 22px #245bd540}
+#authView .brand h1{font-size:25px;letter-spacing:-.05em;color:#172744}
+#authView .brand p{font-size:12px;color:#73819a}
+#authView section h2{font-size:25px;letter-spacing:-.045em;color:#172744;margin:0 0 7px}
+#authView section>p{font-size:13px;line-height:1.6;margin:0 0 20px}
+#authView label{color:#34435c;font-size:12px;margin:14px 0 7px}
+#authView input{min-height:47px;border-radius:12px;border-color:#dce4f0;background:#fbfcff}
+#authView input:focus{outline:3px solid #245bd51c;border-color:#5b86e8}
+#authView form button{width:100%;min-height:48px;margin-top:19px;border-radius:12px;background:linear-gradient(100deg,#245bd5,#7653d6);box-shadow:0 9px 20px #245bd533}
+#authView .links{font-size:12px}
+#appView .main{background:linear-gradient(180deg,#f8faff 0%,#f3f6fc 100%)}
+#appView .topbar{border-bottom:1px solid #e8edf5;box-shadow:0 4px 18px #17274408}
+#appView .page-head h2{letter-spacing:-.045em}
+#appView .panel,#appView .stat{border:1px solid #e8edf5;border-radius:17px;box-shadow:0 8px 26px rgba(22,44,82,.045)}
+#appView .panel{background:linear-gradient(180deg,#fff,#fcfdff)}
+#appView .stat{background:#fff}
+#appView .stat:before{border-radius:17px 0 0 17px}
+#appView button:not(.nav button):not(.ghost){transition:transform .18s ease,box-shadow .18s ease}
+#appView button:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 7px 18px #245bd51b}
+#appView input,#appView select,#appView textarea{border-radius:11px;border-color:#dfe6f1}
+#appView input:focus,#appView select:focus,#appView textarea:focus{outline:3px solid #245bd51b;border-color:#6b91e8}
+#appView table{border-collapse:separate;border-spacing:0}
+#appView th{background:#f5f8fd;color:#61718a;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+#appView td{border-bottom:1px solid #edf1f7}
+#appView .nv-dashboard-welcome{position:relative;isolation:isolate;overflow:hidden;border:1px solid #ffffff20;background:linear-gradient(105deg,#142b50 0%,#244f91 56%,#3d5fa5 100%);box-shadow:0 16px 36px #173d7728}
+#appView .nv-dashboard-welcome:after{content:"";position:absolute;z-index:-1;right:0;top:0;bottom:0;width:48%;background:linear-gradient(90deg,#244f9100,#142b5020),url("https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=1000&q=80") center/cover;opacity:.5;mask-image:linear-gradient(90deg,transparent,#000 35%)}
+#appView .nv-dashboard-welcome h2,#appView .nv-dashboard-welcome p{max-width:560px}
+#appView .nv-dashboard-cards .stat{transition:transform .2s ease,box-shadow .2s ease}
+#appView .nv-dashboard-cards .stat:hover{transform:translateY(-3px);box-shadow:0 15px 32px #1a376019}
+.public-store{background:#f5f7fc}
+.store-header{position:relative;isolation:isolate;overflow:hidden;min-height:220px;padding:45px 20px;background:linear-gradient(100deg,#10203d 0%,#173b6b 58%,#1d4c82 100%)}
+.store-header:after{content:"";position:absolute;z-index:-1;right:0;top:0;bottom:0;width:56%;background:linear-gradient(90deg,#173b6b 0%,#173b6b35 52%,#10203d10 100%),url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80") center/cover;opacity:.72;mask-image:linear-gradient(90deg,transparent,#000 28%)}
+.store-header-inner{position:relative;z-index:1}
+.store-brand{align-items:center}
+.store-logo{border:2px solid #ffffff55;box-shadow:0 10px 26px #06152b40}
+.store-header h1{font-weight:850;letter-spacing:-.045em}
+.store-header p{max-width:680px;line-height:1.55}
+.store-content{padding-top:30px}
+.store-tools{padding:13px;background:#fff;border:1px solid #e6ebf3;border-radius:16px;box-shadow:0 8px 24px #19365b0b}
+.store-product{border:1px solid #e6ebf3;border-radius:18px;box-shadow:0 10px 28px #19365b0b;transition:transform .2s ease,box-shadow .2s ease}
+.store-product:hover{transform:translateY(-4px);box-shadow:0 18px 36px #19365b18}
+.store-product img{transition:transform .35s ease}
+.store-product:hover img{transform:scale(1.025)}
+.store-product-info{padding:17px}
+.store-price{color:#245bd5}
+.store-actions button:first-child{background:linear-gradient(100deg,#245bd5,#7653d6)}
+.store-footer{border-top:1px solid #e6ebf3;background:#fff}
+.nv-marketplace{background:#f7f9fd}
+.nv-market-header{height:78px;box-shadow:0 5px 22px #14274708}
+.nv-market-hero{background-image:linear-gradient(90deg,#f2f6ff 0%,#f2f6ff 38%,rgba(242,246,255,.86) 54%,rgba(242,246,255,.12) 100%),url("https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1900&q=85");background-position:center;background-size:cover;min-height:440px}
+.nv-market-hero-inner{padding:76px 0 72px}
+.nv-market-hero h1{max-width:650px}
+.nv-market-hero-art{right:max(5%,calc((100% - 1180px)/2));width:330px;height:285px;border-radius:30px;background:url("https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=900&q=85") center/cover;box-shadow:0 28px 65px #183b7030;border:7px solid #ffffffd9;overflow:hidden}
+.nv-market-hero-art:after{content:"";position:absolute;inset:0;background:linear-gradient(145deg,#ffffff08,#14274722)}
+.nv-market-hero-art .nv-market-art-card,.nv-market-hero-art .nv-market-art-circle{display:none}
+.nv-market-benefits>div{padding:12px 14px;border:1px solid #e9eef6;border-radius:15px;background:#fff}
+.nv-market-catalog{padding-top:44px}
+.nv-market-card{border:1px solid #e7edf6;border-radius:18px;box-shadow:0 10px 28px #183b700d;transition:transform .2s ease,box-shadow .2s ease}
+.nv-market-card:hover{transform:translateY(-4px);box-shadow:0 18px 38px #183b7018}
+.nv-market-photo{background:linear-gradient(145deg,#edf3ff,#f8faff)}
+.nv-market-card-body{padding:17px}
+.nv-market-price{color:#245bd5}
+.nv-market-seller-cta{border-radius:22px;background:linear-gradient(110deg,#142747,#24539a 70%,#7653d6);box-shadow:0 16px 38px #173d7724}
+.nv-market-footer{margin-top:35px;border-top:1px solid #e8edf5;background:#fff}
+@media(max-width:850px){
+ #authView.auth-wrap{justify-content:center;padding:28px 18px}
+ #authView.auth-wrap:before{background-image:linear-gradient(180deg,rgba(10,23,46,.45),rgba(10,23,46,.88)),url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80")}
+ #authView.auth-wrap:after{content:"NEXOVENTAS";top:28px;left:22px;transform:none;width:auto;font-size:19px;letter-spacing:.14em}
+ #authView .auth-card{margin-top:46px;padding:27px 23px}
+ .nv-market-hero{background-image:linear-gradient(90deg,rgba(242,246,255,.96),rgba(242,246,255,.84)),url("https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1200&q=80")}
+ .nv-market-hero-art{display:none}
+ .store-header:after{width:100%;opacity:.3;mask-image:linear-gradient(90deg,#000,#000)}
+}
+@media(max-width:560px){
+ #authView.auth-wrap{padding:18px 13px}
+ #authView .auth-card{padding:24px 19px;border-radius:21px}
+ #authView section h2{font-size:23px}
+ .nv-market-hero{min-height:390px}
+ .nv-market-hero-inner{padding:55px 0}
+ .nv-market-hero h1{font-size:39px}
+ .nv-market-benefits{grid-template-columns:1fr;gap:9px}
+ .store-header{min-height:190px;padding:28px 15px}
+ .store-header:after{width:100%;opacity:.22}
+ .store-brand{align-items:flex-start}
+}
+
 </style>
 </head>
 <body>
