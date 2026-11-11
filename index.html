@@ -639,6 +639,13 @@ tbody tr:hover{background:#f8faff}
 #appView form label{line-height:1.4}
 #appView input:disabled,#appView select:disabled,#appView textarea:disabled{background:#f4f6fa;color:#8a96a8;cursor:not-allowed}
 @media(max-width:600px){#appView .nv-table-tools{align-items:stretch}#appView .nv-table-search{max-width:none;flex-basis:100%}#appView .nv-table-pagination{align-items:flex-start;flex-direction:column}#appView .nv-table-pagination>div{width:100%}#appView .nv-table-pagination button{flex:1}#appView .nv-chart-bars{gap:5px;min-height:165px;padding-left:0;padding-right:0}#appView .nv-chart-column{height:155px;gap:6px}#appView .nv-chart-column strong{font-size:9px}#appView .nv-chart-track{height:105px;width:70%}#appView .nv-chart-column small{font-size:10px}}
+
+#appView .nv-loading-state{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;border:1px dashed #dce5f1;border-radius:16px;background:#ffffffa8;color:#43536d;text-align:center;padding:24px}
+#appView .nv-loading-state strong{font-size:13px}
+#appView .nv-loading-state small{font-size:11px;color:#8793a6}
+#appView .nv-spinner{width:28px;height:28px;border:3px solid #e3eaf6;border-top-color:#3267d7;border-radius:50%;animation:nv-spin .8s linear infinite}
+@keyframes nv-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){#appView .nv-spinner{animation:none;border-top-color:#3267d7}}
 </style>
 </head>
 <body>
@@ -898,6 +905,8 @@ async function renderPublicStore(slug){
 
 async function renderPage(){
  if(!profile)return;if(!isAdmin()&&adminPages.has(currentPage))currentPage="dashboard";appMessage("");const root=$("pageContent");
+ root.setAttribute("aria-busy","true");
+ root.innerHTML='<div class="nv-loading-state" role="status"><span class="nv-spinner"></span><strong>Cargando sección…</strong><small>Estamos preparando la información de tu comercio.</small></div>';
  try{
   if(currentPage==="tienda"){
    const {data:b,error}=await db.from("comercios").select("nombre,tienda_slug,tienda_activa,telefono,whatsapp,descripcion,direccion,localidad,provincia,codigo_postal,logo_url").eq("id",profile.comercio_id).maybeSingle();
@@ -1337,7 +1346,7 @@ async function renderPage(){
       out.textContent=answer;
     }catch(err){out.textContent="No pude analizar los datos: "+err.message;}};
   }
- }catch(err){root.innerHTML='<section class="panel"><p class="muted">No pudimos cargar esta sección.</p><p>'+safe(err.message)+'</p><button class="secondary" id="retry">Reintentar</button></section>';const r=$("retry");if(r)r.onclick=renderPage;}
+ }catch(err){root.innerHTML='<section class="panel"><p class="muted">No pudimos cargar esta sección.</p><p>'+safe(err.message)+'</p><button class="secondary" id="retry">Reintentar</button></section>';const r=$("retry");if(r)r.onclick=renderPage;}finally{root.removeAttribute("aria-busy");}
 }
 async function openProductVariants(product){
  if(!product)return;
